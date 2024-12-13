@@ -1,7 +1,7 @@
 [project]
-name = "risks"
+name = "environmental-risk-metrics"
 version = "0.1.0"
-description = "Add your description here"
+description = "Calculate environmental risk metrics for a given polygon"
 readme = "README.md"
 authors = [
     { name = "Thimm", email = "zwiener@gmail.com" }
