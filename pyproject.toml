@@ -1,0 +1,50 @@
+[project]
+name = "risks"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Thimm", email = "zwiener@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "azure-functions>=1.21.3",
+    "azure-storage-blob>=12.24.0",
+    "fastapi>=0.115.6",
+    "geopandas>=1.0.1",
+    "geopy>=2.4.1",
+    "jupyter>=1.1.1",
+    "jupyter-cache>=1.0.1",
+    "leafmap>=0.42.5",
+    "odc-algo>=0.2.3",
+    "odc-stac>=0.3.10",
+    "orjson>=3.10.12",
+    "papermill>=2.6.0",
+    "pint-pandas>=0.6.2",
+    "planetary-computer>=1.0.0",
+    "plotly>=5.24.1",
+    "pyarrow>=18.1.0",
+    "pydantic-pint>=0.1",
+    "pygbif>=0.6.5",
+    "pystac-client>=0.8.5",
+    "rasterstats>=0.20.0",
+    "rioxarray>=0.18.1",
+    "scipy>=1.14.1",
+    "supabase>=2.10.0",
+    "uvicorn>=0.32.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["./src/"]
+filterwarnings = [
+    "ignore:Support for class-based `config` is deprecated:DeprecationWarning"
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+]
