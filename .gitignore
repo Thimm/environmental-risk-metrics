@@ -12,3 +12,4 @@ wheels/
 # Jupyter notebooks
 .ipynb_checkpoints/
 .pytest_cache/
+.env
