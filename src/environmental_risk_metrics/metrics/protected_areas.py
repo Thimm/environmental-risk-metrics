@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Dict, List
 
@@ -6,7 +5,6 @@ import geopandas as gpd
 import leafmap
 import requests
 from bs4 import BeautifulSoup
-from shapely.geometry import Point
 
 from environmental_risk_metrics.base import BaseEnvironmentalMetric
 
@@ -105,10 +103,28 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
             polygon=polygon, polygon_crs=polygon_crs, limit=limit
         )
 
-    def create_map(self, polygon: dict, polygon_crs: str, **kwargs) -> None:
-        """Create a map for the Ramsar protected areas data"""
-        polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        center = self.get_centroid(polygon, polygon_crs)
+    def create_map(self, polygons: dict | list, polygon_crs: str, **kwargs) -> None:
+        """Create a map for the Ramsar protected areas data
+        
+        Args:
+            polygons: Single GeoJSON polygon or list of polygons
+            polygon_crs: CRS of the input polygon(s)
+        """
+        # Convert single polygon to list for consistent handling
+        if isinstance(polygons, dict):
+            polygons = [polygons]
+            
+        # Preprocess all polygons
+        processed_polygons = [
+            self._preprocess_geometry(polygon, source_crs=polygon_crs)
+            for polygon in polygons
+        ]
+        
+        # Get center from first polygon
+        gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
+        bounds = gdf.total_bounds
+        center = ((bounds[1] + bounds[3])/2, (bounds[0] + bounds[2])/2)
+
         m = leafmap.Map(
             center=(center[1], center[0]),
             zoom=9,
@@ -142,7 +158,10 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
             srs="EPSG:4326",
             zoom_to_layer=False,
         )
-        m.add_geojson(json.dumps(polygon.__geo_interface__), layer_name="Your Parcels", zoom_to_layer=False)
+
+        # Create GeoDataFrame from processed polygons
+        gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
+        m.add_gdf(gdf, layer_name="Your Parcels", zoom_to_layer=True)
 
         m.add_tile_layer(
             url="https://data-gis.unep-wcmc.org/server/rest/services/ProtectedSites/The_World_Database_of_Protected_Areas/MapServer/tile/{z}/{y}/{x}",

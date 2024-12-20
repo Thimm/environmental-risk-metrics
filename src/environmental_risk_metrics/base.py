@@ -72,13 +72,14 @@ class BaseEnvironmentalMetric:
         """Get the centroid of a geometry"""
         return get_centroid_of_geometry(geometry, source_crs)
 
-    def create_map(self, geometry: dict, **kwargs) -> None:
+    def create_map(self, polygons: dict, polygons_crs: str, **kwargs) -> None:
         """
         Create a visualization map for the metric data. Optional method that can be
         implemented by child classes.
 
         Args:
-            geometry: Input geometry to visualize
+            polygons: Input polygons to visualize
+            polygons_crs: CRS of the input polygons
             **kwargs: Additional visualization parameters
 
         Raises:

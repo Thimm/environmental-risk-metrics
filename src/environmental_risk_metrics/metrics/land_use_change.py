@@ -1,8 +1,6 @@
 import json
 import logging
-import re
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import geopandas as gpd
@@ -454,10 +452,27 @@ class OpenLandMapLandCover(BaseLandCover):
         percentage = percentage.fillna(0)
         return round(percentage * 100, 2)
 
-    def create_map(self, polygon: dict, polygon_crs: str, **kwargs) -> None:
-        """Create a map for the land use change data"""
-        polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        center = self.get_centroid(polygon, polygon_crs)
+    def create_map(self, polygons: dict | list, polygon_crs: str, **kwargs) -> None:
+        """Create a map for the land use change data
+        
+        Args:
+            polygons: Single GeoJSON polygon or list of polygons
+            polygon_crs: CRS of the input polygon(s)
+        """
+        # Convert single polygon to list for consistent handling
+        if isinstance(polygons, dict):
+            polygons = [polygons]
+            
+        # Preprocess all polygons
+        processed_polygons = [
+            self._preprocess_geometry(polygon, source_crs=polygon_crs)
+            for polygon in polygons
+        ]
+        
+        # Get center from first polygon
+        gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
+        bounds = gdf.total_bounds
+        center = ((bounds[1] + bounds[3])/2, (bounds[0] + bounds[2])/2)
         
         m = leafmap.Map(
             center=(center[1], center[0]),
@@ -471,6 +486,7 @@ class OpenLandMapLandCover(BaseLandCover):
             scale_control=False,
             toolbar_control=True,
         )
+        
         colormap = self.get_legend_colors()
         for year, cog in OPENLANDMAP_LC.items():
             m.add_cog_layer(
@@ -480,7 +496,11 @@ class OpenLandMapLandCover(BaseLandCover):
                 attribution="UMD GLAD",
                 shown=True
             )
-        m.add_geojson(json.dumps(polygon.__geo_interface__), layer_name="Your Parcels", zoom_to_layer=True)
+            
+        # Create GeoDataFrame from processed polygons
+        gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
+        m.add_gdf(gdf, layer_name="Your Parcels", zoom_to_layer=True)
+        
         return m
 
 
