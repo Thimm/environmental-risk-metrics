@@ -4,23 +4,18 @@ version = "0.1.5"
 description = "Calculate environmental risk metrics for a given polygon"
 readme = "README.md"
 authors = [
-    { name = "Thimm", email = "zwiener@gmail.com" }
+    { name = "Thimm Zwiener", email = "zwiener@gmail.com" },
+    { name = "Thimm Zwiener", email = "thimm@regenrate.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "azure-functions>=1.21.3",
-    "azure-storage-blob>=12.24.0",
-    "fastapi>=0.115.6",
     "geopandas>=1.0.1",
     "geopy>=2.4.1",
-    "jupyter>=1.1.1",
-    "jupyter-cache>=1.0.1",
     "leafmap>=0.42.5",
     "localtileserver>=0.10.5",
     "odc-algo>=0.2.3",
     "odc-stac>=0.3.10",
-    "orjson>=3.10.12",
-    "papermill>=2.6.0",
+    "pint>=0.24.4",
     "pint-pandas>=0.6.2",
     "planetary-computer>=1.0.0",
     "plotly>=5.24.1",
@@ -31,8 +26,6 @@ dependencies = [
     "rasterstats>=0.20.0",
     "rioxarray>=0.18.1",
     "scipy>=1.14.1",
-    "supabase>=2.10.0",
-    "uvicorn>=0.32.1",
 ]
 
 [build-system]
@@ -49,4 +42,5 @@ filterwarnings = [
 dev = [
     "pytest-mock>=3.14.0",
     "pytest>=8.3.4",
+    "jupyter>=1.1.1",
 ]
