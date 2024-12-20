@@ -184,11 +184,12 @@ class BaseLandCover(BaseEnvironmentalMetric):
         name: str,
         legend: Dict[int, str],
         sources: List[str],
+        description: str,
         resolution: int,
         max_workers: int = 10,
         show_progress: bool = True,
     ) -> None:
-        super().__init__()
+        super().__init__(sources=sources, description=description)
         self.collections = collections
         self.band_name = band_name
         self.name = name
@@ -325,12 +326,15 @@ class BaseLandCover(BaseEnvironmentalMetric):
 
 class EsaLandCover(BaseLandCover):
     def __init__(self, use_esri_classes: bool = False) -> None:
+        sources = [
+            "https://planetarycomputer.microsoft.com/dataset/esa-cci-lc",
+            "https://doi.org/10.24381/cds.006f2c9a",
+        ]
+        description = "ESA Climate Change Initiative (CCI) Land Cover"
         super().__init__(
             collections=["esa-cci-lc"],
-            sources=[
-                "https://planetarycomputer.microsoft.com/dataset/esa-cci-lc",
-                "https://doi.org/10.24381/cds.006f2c9a",
-            ],
+            sources=sources,
+            description=description,
             name="ESA Climate Change Initiative (CCI) Land Cover",
             band_name="lccs_class",
             resolution=0.00009,
@@ -342,11 +346,15 @@ class EsaLandCover(BaseLandCover):
 
 class EsriLandCover(BaseLandCover):
     def __init__(self) -> None:
+        sources = [
+            "https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02",
+            "https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02",
+        ]
+        description = "Esri Land Use"
         super().__init__(
             collections=["io-lulc-annual-v02"],
-            sources=[
-                "https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02#Example-Notebook"
-            ],
+            sources=sources,
+            description=description,
             name="Esri Land Use",
             band_name="data",
             legend=ESRI_LAND_COVER_LEGEND,
@@ -356,9 +364,15 @@ class EsriLandCover(BaseLandCover):
 
 class OpenLandMapLandCover(BaseLandCover):
     def __init__(self, use_esri_classes: bool = False) -> None:
+        sources = [ 
+            "https://glad.umd.edu/dataset/GLCLUC",
+            "https://glad.umd.edu/dataset/GLCLUC",
+        ]
+        description = "GLAD Land Use/Cover"
         super().__init__(
             collections=None,
-            sources=["https://glad.umd.edu/dataset/GLCLUC"],
+            sources=sources,
+            description=description,
             name="GLAD Land Use/Cover",
             band_name="data",
             resolution=10,

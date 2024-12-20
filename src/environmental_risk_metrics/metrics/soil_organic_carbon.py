@@ -13,8 +13,7 @@ class SoilOrganicCarbon(BaseEnvironmentalMetric):
     """Class for analyzing soil organic carbon data"""
 
     def __init__(self):
-        super().__init__()
-        self.source = [
+        sources = [
             {
                 "url": "https://s3.openlandmap.org/arco/organic.carbon_usda.6a1c_m_250m_b0cm_19500101_20171231_go_epsg.4326_v0.2.tif",
                 "depth": "0cm",
@@ -40,6 +39,8 @@ class SoilOrganicCarbon(BaseEnvironmentalMetric):
                 "depth": "200cm",
             },
         ]
+        description = "Soil Organic Carbon"
+        super().__init__(sources=sources, description=description)
 
     def get_carbon_stats(
         self, polygon: dict, polygon_crs: str = None, all_touched: bool = True
@@ -57,7 +58,7 @@ class SoilOrganicCarbon(BaseEnvironmentalMetric):
         """
         polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
         results = {}
-        for soc_cog in self.source:
+        for soc_cog in self.sources:
             stats = rasterstats.zonal_stats(
                 polygon, soc_cog["url"], stats=["mean"], all_touched=all_touched
             )[0]
@@ -109,7 +110,7 @@ class SoilOrganicCarbon(BaseEnvironmentalMetric):
                 colormap[i][1],
             )
 
-        for soc_cog in self.source:
+        for soc_cog in self.sources:
             m.add_cog_layer(
                 soc_cog["url"],
                 colormap=json.dumps(colormap),
@@ -135,14 +136,17 @@ class SoilOrganicCarbonPotential(BaseEnvironmentalMetric):
     """Class for analyzing soil organic carbon potential using FAO GSOCseq data"""
 
     def __init__(self):
-        super().__init__()
+        sources = [
+            "http://54.229.242.119/GSOCseqv1.1/GSOCseq_T0_Map030.tif",
+        ]
+        description = "Soil Organic Carbon Potential"
+        super().__init__(sources=sources, description=description)
         self.units = "kg/ha"
-        self.source = "http://54.229.242.119/GSOCseqv1.1/GSOCseq_T0_Map030.tif"
 
     def get_carbon_potential(self, polygon: dict, polygon_crs: str, all_touched: bool = True) -> Dict[str, float]:
         """Get soil organic carbon potential for a given geometry"""
         polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        stats = rasterstats.zonal_stats(polygon, self.source, stats=["mean"], all_touched=all_touched)
+        stats = rasterstats.zonal_stats(polygon, self.sources[0], stats=["mean"], all_touched=all_touched)
         return stats[0]["mean"]
     
     def get_data(self, polygon: dict, polygon_crs: str, all_touched: bool = True, **kwargs) -> Dict[str, float]:

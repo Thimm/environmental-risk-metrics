@@ -30,7 +30,13 @@ class Sentinel2(BaseEnvironmentalMetric):
         cropped_image_cloud_cover_threshold: int = 80,
         max_workers: int = 10,
     ):
-        super().__init__()
+        sources = [
+            "https://planetarycomputer.microsoft.com/api/stac/v1",
+            "https://planetarycomputer.microsoft.com/api/stac/v1",
+        ]
+        description = "Sentinel-2 data from Planetary Computer"
+
+        super().__init__(sources=sources, description=description)
         self.collections = ["sentinel-2-l2a"]
         self.resolution = resolution
         self.entire_image_cloud_cover_threshold = entire_image_cloud_cover_threshold

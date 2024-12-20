@@ -11,7 +11,12 @@ class GlobalWitness(BaseEnvironmentalMetric):
     """Class for analyzing Global Witness environmental defender data"""
 
     def __init__(self):
-        super().__init__()
+        sources = [ 
+            "https://globalwitness.org/wp-content/uploads/2024/10/Global-Witness-Led-10-10-24.csv",
+            "https://globalwitness.org/wp-content/uploads/2024/10/Global-Witness-Led-10-10-24.csv",
+        ]
+        description = "Global Witness data"
+        super().__init__(sources=sources, description=description)
         # Load country boundaries
         self.countries = gpd.read_file(
             filename=os.path.join(

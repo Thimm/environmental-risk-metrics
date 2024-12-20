@@ -17,17 +17,32 @@ class BaseEnvironmentalMetric:
     # Default CRS for all metrics unless overridden
     DEFAULT_CRS = "EPSG:4326"
 
-    def __init__(self, target_crs: str = None, legend: dict = None, **kwargs):
+    def __init__(
+        self,
+        sources: list[str],
+        description: str,
+        target_crs: str = None,
+        legend: dict = None,
+        **kwargs
+    ):
         """
         Initialize the metric with optional CRS override and legend
 
         Args:
             target_crs: Override default CRS for this instance
             legend: Legend for the metric
+            sources: List of data source URLs or descriptions
+            description: Description of what this metric measures
             **kwargs: Additional initialization parameters
         """
         self.target_crs = target_crs or self.DEFAULT_CRS
         self.legend = legend or {}
+        if sources is None:
+            raise ValueError("sources must be provided")
+        self.sources = sources
+        if description is None:
+            raise ValueError("description must be provided")
+        self.description = description
         super().__init__(**kwargs)
 
     def _preprocess_geometry(

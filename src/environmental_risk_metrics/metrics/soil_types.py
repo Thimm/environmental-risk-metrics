@@ -13,7 +13,11 @@ class SoilTypes(BaseEnvironmentalMetric):
     """Class for analyzing USDA soil type data"""
 
     def __init__(self):
-        super().__init__()
+        sources = [
+            "https://s3.openlandmap.org/arco/grtgroup_usda.soiltax_c_250m_s_19500101_20171231_go_espg.4326_v0.2.tif",
+        ]
+        description = "USDA Soil Types from OpenLandMap"
+        super().__init__(sources=sources, description=description)
         self.cog_url = "https://s3.openlandmap.org/arco/grtgroup_usda.soiltax_c_250m_s_19500101_20171231_go_espg.4326_v0.2.tif"
         soil_types_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), "resources", "soil_types.json"

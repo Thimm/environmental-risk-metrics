@@ -13,7 +13,12 @@ class EndangeredSpecies(BaseEnvironmentalMetric):
     """Class for analyzing endangered species data from GBIF"""
 
     def __init__(self):
-        super().__init__()
+        sources = [
+            "https://api.gbif.org/v1",
+            "https://api.gbif.org/v1",
+        ]
+        description = "Endangered species data from GBIF"
+        super().__init__(sources=sources, description=description)
         self.iucn_categories = {
             "EX": "Extinct",
             "EW": "Extinct in the Wild", 

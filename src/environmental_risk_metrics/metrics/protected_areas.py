@@ -15,7 +15,13 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
     """Class for analyzing protected areas data from Ramsar sites"""
 
     def __init__(self):
-        super().__init__()
+        sources = [
+            "https://rsis.ramsar.org/geoserver/wms",
+            "https://rsis.ramsar.org/geoserver/wms",
+        ]
+        description = "Ramsar protected areas data" 
+        super().__init__(sources=sources, description=description)
+
         self.ramsar_sites = gpd.read_parquet(
             path=os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
