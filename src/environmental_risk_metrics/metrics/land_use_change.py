@@ -469,7 +469,7 @@ class BaseLandCover(BaseEnvironmentalMetric):
         polygon_crs: str,
     ) -> xr.Dataset:
         polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        logger.info(f"Loading {self.collections} data at {self.resolution}m resolution")
+        logger.debug(f"Loading {self.collections} data at {self.resolution}m resolution")
         items = self.get_items(
             start_date=start_date,
             end_date=end_date,

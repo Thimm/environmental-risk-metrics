@@ -33,7 +33,7 @@ def get_planetary_computer_items(
         modifier=planetary_computer.sign_inplace,  # noqa: F821
     )
 
-    logger.info(
+    logger.debug(
         f"Searching for Sentinel-2 items between {start_date} and {end_date}"
     )
     search = catalog.search(
@@ -43,5 +43,5 @@ def get_planetary_computer_items(
         query={"eo:cloud_cover": {"lt": entire_image_cloud_cover_threshold}} if entire_image_cloud_cover_threshold else None,
     )
     items = search.item_collection()
-    logger.info(f"Found {len(items)} items")
+    logger.debug(f"Found {len(items)} items")
     return items

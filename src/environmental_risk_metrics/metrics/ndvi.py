@@ -96,7 +96,7 @@ class Sentinel2(BaseEnvironmentalMetric):
         Returns:
             xarray Dataset containing the Sentinel-2 data
         """
-        logger.info(
+        logger.debug(
             f"Loading Sentinel-2 data for bands {bands} at {self.resolution}m resolution"
         )
         polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
@@ -117,12 +117,12 @@ class Sentinel2(BaseEnvironmentalMetric):
             )
 
         # Sign the items to get access
-        logger.info("Signing items for access")
+        logger.debug("Signing items for access")
         signed_items = [planetary_computer.sign(item) for item in items]
         thread_pool = ThreadPoolExecutor(max_workers=self.max_workers)
 
         # Load the data into an xarray Dataset
-        logger.info("Loading data into xarray Dataset")
+        logger.debug("Loading data into xarray Dataset")
         progress = tqdm
         ds = odc.stac.load(
             signed_items,
@@ -140,9 +140,9 @@ class Sentinel2(BaseEnvironmentalMetric):
             logger.debug(
                 f"Cloud cover percentage: {cloud_cover_pct}. Filtering data based on {self.cropped_image_cloud_cover_threshold}% cloud cover threshold"
             )
-            logger.info(f"Dataset time steps before filtering: {len(ds.time)}")
+            logger.debug(f"Dataset time steps before filtering: {len(ds.time)}")
             ds = ds.sel(time=cloud_cover_pct <= self.cropped_image_cloud_cover_threshold)
-            logger.info(
+            logger.debug(
                 f"Filtered dataset to {len(ds.time)} time steps based on {self.cropped_image_cloud_cover_threshold}% cloud cover threshold"
             )
 
@@ -150,7 +150,7 @@ class Sentinel2(BaseEnvironmentalMetric):
             cloud_clear_mask = (ds.SCL == 4) | (ds.SCL == 5)
             ds = ds.where(cloud_clear_mask, drop=True)
 
-        logger.info("Successfully loaded Sentinel-2 data")
+        logger.debug("Successfully loaded Sentinel-2 data")
         return ds
 
     def load_ndvi_images(
@@ -175,7 +175,7 @@ class Sentinel2(BaseEnvironmentalMetric):
             xarray Dataset containing the NDVI data
         """
         polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
-        logger.info("Loading NDVI data")
+        logger.debug("Loading NDVI data")
         ds = self.load_xarray(
             start_date=start_date,
             end_date=end_date,
@@ -186,7 +186,7 @@ class Sentinel2(BaseEnvironmentalMetric):
         )
         logger.debug("Calculating NDVI from bands B08 and B04")
         ndvi = (ds.B08 - ds.B04) / (ds.B08 + ds.B04)
-        logger.info("Successfully calculated NDVI")
+        logger.debug("Successfully calculated NDVI")
         return ndvi
 
     @staticmethod
@@ -289,7 +289,7 @@ class Sentinel2(BaseEnvironmentalMetric):
         Returns:
             pd.DataFrame: DataFrame with mean NDVI values
         """
-        logger.info("Calculating mean NDVI values for polygon")
+        logger.debug("Calculating mean NDVI values for polygon")
 
         ndvi_images = self.load_ndvi_images(
             polygon=polygon,
@@ -320,7 +320,7 @@ class Sentinel2(BaseEnvironmentalMetric):
             else:
                 mean_ndvi = interpolate_ndvi(mean_ndvi, start_date, end_date)
 
-        logger.info(f"Calculated mean NDVI for {len(mean_ndvi)} timestamps")
+        logger.debug(f"Calculated mean NDVI for {len(mean_ndvi)} timestamps")
         return mean_ndvi
 
     def get_data(
