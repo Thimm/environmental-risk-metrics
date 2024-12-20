@@ -5,7 +5,7 @@ from .metrics.land_use_change import EsaLandCover, EsriLandCover, OpenLandMapLan
 from .metrics.ndvi import Sentinel2
 from .metrics.protected_areas import RamsarProtectedAreas
 from .metrics.social_indices import GlobalWitness
-from .metrics.soil_organic_carbon import SoilOrganicCarbon
+from .metrics.soil_organic_carbon import SoilOrganicCarbon, SoilOrganicCarbonPotential
 from .metrics.soil_types import SoilTypes
 from .utils.metric_calculator import calculate_metrics
 
@@ -23,5 +23,6 @@ __all__ = [
     "RamsarProtectedAreas",
     "GlobalWitness",
     "calculate_metrics",
+    "SoilOrganicCarbonPotential",
 ]
     

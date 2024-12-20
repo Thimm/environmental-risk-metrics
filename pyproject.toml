@@ -16,6 +16,7 @@ dependencies = [
     "jupyter>=1.1.1",
     "jupyter-cache>=1.0.1",
     "leafmap>=0.42.5",
+    "localtileserver>=0.10.5",
     "odc-algo>=0.2.3",
     "odc-stac>=0.3.10",
     "orjson>=3.10.12",

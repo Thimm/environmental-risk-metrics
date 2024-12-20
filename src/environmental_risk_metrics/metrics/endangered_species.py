@@ -75,4 +75,6 @@ class EndangeredSpecies(BaseEnvironmentalMetric):
     def get_data(self, polygon: dict, polygon_crs: str, buffer_meters: int = 30000, **kwargs) -> Dict:
         """Get endangered species statistics for a given geometry"""
         polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        return self.get_species_stats(polygon=polygon, polygon_crs=polygon_crs, buffer_meters=buffer_meters)
+        df =  self.get_species_stats(polygon=polygon, polygon_crs=polygon_crs, buffer_meters=buffer_meters)
+        records = df.to_dict(orient="records")
+        return records

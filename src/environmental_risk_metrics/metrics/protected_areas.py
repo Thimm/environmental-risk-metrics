@@ -1,7 +1,9 @@
+import json
 import os
 from typing import Dict, List
 
 import geopandas as gpd
+import leafmap
 import requests
 from bs4 import BeautifulSoup
 from shapely.geometry import Point
@@ -96,3 +98,49 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
         return self.get_nearest_ramsar_sites(
             polygon=polygon, polygon_crs=polygon_crs, limit=limit
         )
+
+    def create_map(self, polygon: dict, polygon_crs: str, **kwargs) -> None:
+        """Create a map for the Ramsar protected areas data"""
+        polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
+        center = self.get_centroid(polygon, polygon_crs)
+        m = leafmap.Map(
+            center=(center[1], center[0]),
+            zoom=9,
+            draw_control=False,
+            measure_control=False,
+            fullscreen_control=False,
+            attribution_control=False,
+            search_control=False,
+            layers_control=False,
+            scale_control=False,
+            toolbar_control=False,
+            basemap="Esri.WorldGrayCanvas",
+        )
+
+        ramsar_url = "https://rsis.ramsar.org/geoserver/wms?"
+        m.add_wms_layer(
+            url=ramsar_url,
+            layers="ramsar_sdi:features",
+            name="NAIP Imagery",
+            format="image/png",
+            shown=True,
+            srs="EPSG:4326",
+            zoom_to_layer=False,
+        )
+        m.add_wms_layer(
+            url=ramsar_url,
+            layers="ramsar_sdi:features_centroid",
+            name="NAIP Imagery",
+            format="image/png",
+            shown=True,
+            srs="EPSG:4326",
+            zoom_to_layer=False,
+        )
+        m.add_geojson(json.dumps(polygon.__geo_interface__), layer_name="Your Parcels", zoom_to_layer=False)
+
+        m.add_tile_layer(
+            url="https://data-gis.unep-wcmc.org/server/rest/services/ProtectedSites/The_World_Database_of_Protected_Areas/MapServer/tile/{z}/{y}/{x}",
+            attribution="The World Database of Protected Areas",
+            name="The World Database of Protected Areas",
+        )
+        return m

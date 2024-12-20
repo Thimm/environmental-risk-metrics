@@ -1,0 +1,1157 @@
+ESA_LAND_COVER_LEGEND = {
+    0: {"value": 0, "color": "#ffffff", "label": "No data"},
+    10: {"value": 10, "color": "#FFD700", "label": "Cropland, rainfed"},
+    11: {
+        "value": 11,
+        "color": "#FFD700",
+        "label": "Cropland, rainfed, herbaceous cover",
+    },
+    12: {
+        "value": 12,
+        "color": "#FFD700",
+        "label": "Cropland, rainfed, tree, or shrub cover",
+    },
+    20: {
+        "value": 20,
+        "color": "#00ff00",
+        "label": "Cropland, irrigated or post-flooding",
+    },
+    30: {
+        "value": 30,
+        "color": "#c2d6c2",
+        "label": "Mosaic cropland (>50%) / natural vegetation (tree, shrub, herbaceous cover) (<50%)",
+    },
+    40: {
+        "value": 40,
+        "color": "#a8d8a8",
+        "label": "Mosaic natural vegetation (tree, shrub, herbaceous cover) (>50%) / cropland (<50%)",
+    },
+    50: {
+        "value": 50,
+        "color": "#228B22",
+        "label": "Tree cover, broadleaved, evergreen, closed to open (>15%)",
+    },
+    60: {
+        "value": 60,
+        "color": "#8B4513",
+        "label": "Tree cover, broadleaved, deciduous, closed to open (>15%)",
+    },
+    61: {
+        "value": 61,
+        "color": "#8B4513",
+        "label": "Tree cover, broadleaved, deciduous, closed (>40%)",
+    },
+    62: {
+        "value": 62,
+        "color": "#8B4513",
+        "label": "Tree cover, broadleaved, deciduous, open (15-40%)",
+    },
+    70: {
+        "value": 70,
+        "color": "#228B22",
+        "label": "Tree cover, needleleaved, evergreen, closed to open (>15%)",
+    },
+    71: {
+        "value": 71,
+        "color": "#228B22",
+        "label": "Tree cover, needleleaved, evergreen, closed (>40%)",
+    },
+    72: {
+        "value": 72,
+        "color": "#228B22",
+        "label": "Tree cover, needleleaved, evergreen, open (15-40%)",
+    },
+    80: {
+        "value": 80,
+        "color": "#8B4513",
+        "label": "Tree cover, needleleaved, deciduous, closed to open (>15%)",
+    },
+    81: {
+        "value": 81,
+        "color": "#8B4513",
+        "label": "Tree cover, needleleaved, deciduous, closed (>40%)",
+    },
+    82: {
+        "value": 82,
+        "color": "#8B4513",
+        "label": "Tree cover, needleleaved, deciduous, open (15-40%)",
+    },
+    90: {
+        "value": 90,
+        "color": "#228B22",
+        "label": "Tree cover, mixed leaf type (broadleaved and needleleaved)",
+    },
+    100: {
+        "value": 100,
+        "color": "#c2d6c2",
+        "label": "Mosaic tree and shrub (>50%) / herbaceous cover (<50%)",
+    },
+    110: {
+        "value": 110,
+        "color": "#c2d6c2",
+        "label": "Mosaic herbaceous cover (>50%) / tree and shrub (<50%)",
+    },
+    120: {"value": 120, "color": "#8B4513", "label": "Shrubland"},
+    121: {"value": 121, "color": "#8B4513", "label": "Evergreen shrubland"},
+    122: {"value": 122, "color": "#8B4513", "label": "Deciduous shrubland"},
+    130: {"value": 130, "color": "#c2d6c2", "label": "Grassland"},
+    140: {"value": 140, "color": "#d3d3d3", "label": "Lichens and mosses"},
+    150: {
+        "value": 150,
+        "color": "#d3d3d3",
+        "label": "Sparse vegetation (tree, shrub, herbaceous cover) (<15%)",
+    },
+    151: {"value": 151, "color": "#d3d3d3", "label": "Sparse tree (<15%)"},
+    152: {"value": 152, "color": "#d3d3d3", "label": "Sparse shrub (<15%)"},
+    153: {"value": 153, "color": "#d3d3d3", "label": "Sparse herbaceous cover (<15%)"},
+    160: {
+        "value": 160,
+        "color": "#00BFFF",
+        "label": "Tree cover, flooded, fresh or brackish water",
+    },
+    170: {
+        "value": 170,
+        "color": "#00BFFF",
+        "label": "Tree cover, flooded, saline water",
+    },
+    180: {
+        "value": 180,
+        "color": "#00BFFF",
+        "label": "Shrub or herbaceous cover, flooded, fresh/saline/brackish water",
+    },
+    190: {"value": 190, "color": "#A9A9A9", "label": "Urban areas"},
+    200: {"value": 200, "color": "#D3D3D3", "label": "Bare areas"},
+    201: {"value": 201, "color": "#D3D3D3", "label": "Consolidated bare areas"},
+    202: {"value": 202, "color": "#D3D3D3", "label": "Unconsolidated bare areas"},
+    210: {"value": 210, "color": "#0000ff", "label": "Water bodies"},
+    220: {"value": 220, "color": "#FFFFFF", "label": "Permanent snow and ice"},
+}
+
+ESRI_LAND_COVER_LEGEND = {
+    0: {"value": 0, "color": "#ffffff", "label": "No Data"},
+    1: {"value": 1, "color": "#0000ff", "label": "Water"},
+    2: {"value": 2, "color": "#228B22", "label": "Trees"},
+    4: {"value": 4, "color": "#4682B4", "label": "Flooded vegetation"},
+    5: {"value": 5, "color": "#FFD700", "label": "Crops"},
+    7: {"value": 7, "color": "#A9A9A9", "label": "Built area"},
+    8: {"value": 8, "color": "#D3D3D3", "label": "Bare ground"},
+    9: {"value": 9, "color": "#FFFFFF", "label": "Snow/ice"},
+    10: {"value": 10, "color": "#C0C0C0", "label": "Clouds"},
+    11: {"value": 11, "color": "#FFDAB9", "label": "Rangeland"},
+}
+
+OPENLANDMAP_LC_LEGEND = {
+    1: {
+        "value": 1,
+        "color": "#fafac3",
+        "label": "Terra Firma, true desert - 7% short veg. cover (1)",
+    },
+    2: {
+        "value": 2,
+        "color": "#f7f7bb",
+        "label": "Terra Firma, semi-arid - 11% short veg. cover (2)",
+    },
+    3: {
+        "value": 3,
+        "color": "#f4f4b3",
+        "label": "Terra Firma, semi-arid - 15% short veg. cover (3)",
+    },
+    4: {
+        "value": 4,
+        "color": "#f1f1ab",
+        "label": "Terra Firma, semi-arid - 19% short veg. cover (4)",
+    },
+    5: {
+        "value": 5,
+        "color": "#ededa2",
+        "label": "Terra Firma, semi-arid - 23% short veg. cover (5)",
+    },
+    6: {
+        "value": 6,
+        "color": "#eaea9a",
+        "label": "Terra Firma, semi-arid - 27% short veg. cover (6)",
+    },
+    7: {
+        "value": 7,
+        "color": "#e7e792",
+        "label": "Terra Firma, semi-arid - 31% short veg. cover (7)",
+    },
+    8: {
+        "value": 8,
+        "color": "#e4e48a",
+        "label": "Terra Firma, semi-arid - 35% short veg. cover (8)",
+    },
+    9: {
+        "value": 9,
+        "color": "#e0e081",
+        "label": "Terra Firma, semi-arid - 39% short veg. cover (9)",
+    },
+    10: {
+        "value": 10,
+        "color": "#dddd79",
+        "label": "Terra Firma, semi-arid - 43% short veg. cover (10)",
+    },
+    11: {
+        "value": 11,
+        "color": "#dada71",
+        "label": "Terra Firma, semi-arid - 47% short veg. cover (11)",
+    },
+    12: {
+        "value": 12,
+        "color": "#d7d769",
+        "label": "Terra Firma, semi-arid - 51% short veg. cover (12)",
+    },
+    13: {
+        "value": 13,
+        "color": "#d3d360",
+        "label": "Terra Firma, semi-arid - 55% short veg. cover (13)",
+    },
+    14: {
+        "value": 14,
+        "color": "#d0d058",
+        "label": "Terra Firma, semi-arid - 59% short veg. cover (14)",
+    },
+    15: {
+        "value": 15,
+        "color": "#cdcd50",
+        "label": "Terra Firma, semi-arid - 63% short veg. cover (15)",
+    },
+    16: {
+        "value": 16,
+        "color": "#caca48",
+        "label": "Terra Firma, semi-arid - 67% short veg. cover (16)",
+    },
+    17: {
+        "value": 17,
+        "color": "#c6c63f",
+        "label": "Terra Firma, semi-arid - 71% short veg. cover (17)",
+    },
+    18: {
+        "value": 18,
+        "color": "#c3c337",
+        "label": "Terra Firma, semi-arid - 75% short veg. cover (18)",
+    },
+    19: {
+        "value": 19,
+        "color": "#c0c02f",
+        "label": "Terra Firma, dense short vegetation - 79% short veg. cover (19)",
+    },
+    20: {
+        "value": 20,
+        "color": "#bdbd27",
+        "label": "Terra Firma, dense short vegetation - 83% short veg. cover (20)",
+    },
+    21: {
+        "value": 21,
+        "color": "#b9b91e",
+        "label": "Terra Firma, dense short vegetation - 87% short veg. cover (21)",
+    },
+    22: {
+        "value": 22,
+        "color": "#b6b616",
+        "label": "Terra Firma, dense short vegetation - 91% short veg. cover (22)",
+    },
+    23: {
+        "value": 23,
+        "color": "#b3b30e",
+        "label": "Terra Firma, dense short vegetation - 95% short veg. cover (23)",
+    },
+    24: {
+        "value": 24,
+        "color": "#b0b006",
+        "label": "Terra Firma, dense short vegetation - 100% short veg. cover (24)",
+    },
+    25: {
+        "value": 25,
+        "color": "#609c60",
+        "label": "Terra Firma, stable tree cover - 3m trees (25)",
+    },
+    26: {
+        "value": 26,
+        "color": "#5c985c",
+        "label": "Terra Firma, stable tree cover - 4m trees (26)",
+    },
+    27: {
+        "value": 27,
+        "color": "#589558",
+        "label": "Terra Firma, stable tree cover - 5m trees (27)",
+    },
+    28: {
+        "value": 28,
+        "color": "#549254",
+        "label": "Terra Firma, stable tree cover - 6m trees (28)",
+    },
+    29: {
+        "value": 29,
+        "color": "#508e50",
+        "label": "Terra Firma, stable tree cover - 7m trees (29)",
+    },
+    30: {
+        "value": 30,
+        "color": "#4c8b4c",
+        "label": "Terra Firma, stable tree cover - 8m trees (30)",
+    },
+    31: {
+        "value": 31,
+        "color": "#488848",
+        "label": "Terra Firma, stable tree cover - 9m trees (31)",
+    },
+    32: {
+        "value": 32,
+        "color": "#448544",
+        "label": "Terra Firma, stable tree cover - 10m trees (32)",
+    },
+    33: {
+        "value": 33,
+        "color": "#408140",
+        "label": "Terra Firma, stable tree cover - 11m trees (33)",
+    },
+    34: {
+        "value": 34,
+        "color": "#3c7e3c",
+        "label": "Terra Firma, stable tree cover - 12m trees (34)",
+    },
+    35: {
+        "value": 35,
+        "color": "#387b38",
+        "label": "Terra Firma, stable tree cover - 13m trees (35)",
+    },
+    36: {
+        "value": 36,
+        "color": "#347834",
+        "label": "Terra Firma, stable tree cover - 14m trees (36)",
+    },
+    37: {
+        "value": 37,
+        "color": "#317431",
+        "label": "Terra Firma, stable tree cover - 15m trees (37)",
+    },
+    38: {
+        "value": 38,
+        "color": "#2d712d",
+        "label": "Terra Firma, stable tree cover - 16m trees (38)",
+    },
+    39: {
+        "value": 39,
+        "color": "#296e29",
+        "label": "Terra Firma, stable tree cover - 17m trees (39)",
+    },
+    40: {
+        "value": 40,
+        "color": "#256b25",
+        "label": "Terra Firma, stable tree cover - 18m trees (40)",
+    },
+    41: {
+        "value": 41,
+        "color": "#216721",
+        "label": "Terra Firma, stable tree cover - 19m trees (41)",
+    },
+    42: {
+        "value": 42,
+        "color": "#1d641d",
+        "label": "Terra Firma, stable tree cover - 20m trees (42)",
+    },
+    43: {
+        "value": 43,
+        "color": "#196119",
+        "label": "Terra Firma, stable tree cover - 21m trees (43)",
+    },
+    44: {
+        "value": 44,
+        "color": "#155e15",
+        "label": "Terra Firma, stable tree cover - 22m trees (44)",
+    },
+    45: {
+        "value": 45,
+        "color": "#115a11",
+        "label": "Terra Firma, stable tree cover - 23m trees (45)",
+    },
+    46: {
+        "value": 46,
+        "color": "#0d570d",
+        "label": "Terra Firma, stable tree cover - 24m trees (46)",
+    },
+    47: {
+        "value": 47,
+        "color": "#095409",
+        "label": "Terra Firma, stable tree cover - 25m trees (47)",
+    },
+    48: {
+        "value": 48,
+        "color": "#065106",
+        "label": "Terra Firma, stable tree cover - >25m trees (48)",
+    },
+    49: {
+        "value": 49,
+        "color": "#643700",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 3m trees (49)",
+    },
+    50: {
+        "value": 50,
+        "color": "#643a00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 4m trees (50)",
+    },
+    51: {
+        "value": 51,
+        "color": "#643d00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 5m trees (51)",
+    },
+    52: {
+        "value": 52,
+        "color": "#644000",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 6m trees (52)",
+    },
+    53: {
+        "value": 53,
+        "color": "#644300",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 7m trees (53)",
+    },
+    54: {
+        "value": 54,
+        "color": "#644600",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 8m trees (54)",
+    },
+    55: {
+        "value": 55,
+        "color": "#644900",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 9m trees (55)",
+    },
+    56: {
+        "value": 56,
+        "color": "#654c00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 10m trees (56)",
+    },
+    57: {
+        "value": 57,
+        "color": "#654f00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 11m trees (57)",
+    },
+    58: {
+        "value": 58,
+        "color": "#655200",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 12m trees (58)",
+    },
+    59: {
+        "value": 59,
+        "color": "#655500",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 13m trees (59)",
+    },
+    60: {
+        "value": 60,
+        "color": "#655800",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 14m trees (60)",
+    },
+    61: {
+        "value": 61,
+        "color": "#655a00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 15m trees (61)",
+    },
+    62: {
+        "value": 62,
+        "color": "#655d00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 16m trees (62)",
+    },
+    63: {
+        "value": 63,
+        "color": "#656000",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 17m trees (63)",
+    },
+    64: {
+        "value": 64,
+        "color": "#656300",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 18m trees (64)",
+    },
+    65: {
+        "value": 65,
+        "color": "#666600",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 19m trees (65)",
+    },
+    66: {
+        "value": 66,
+        "color": "#666900",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 20m trees (66)",
+    },
+    67: {
+        "value": 67,
+        "color": "#666c00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 21m trees (67)",
+    },
+    68: {
+        "value": 68,
+        "color": "#666f00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 22m trees (68)",
+    },
+    69: {
+        "value": 69,
+        "color": "#667200",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 23m trees (69)",
+    },
+    70: {
+        "value": 70,
+        "color": "#667500",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 24m trees (70)",
+    },
+    71: {
+        "value": 71,
+        "color": "#667800",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - 25m trees (71)",
+    },
+    72: {
+        "value": 72,
+        "color": "#667b00",
+        "label": "Terra Firma, tree cover with prev. disturb. (2020 height) - >25m trees (72)",
+    },
+    73: {
+        "value": 73,
+        "color": "#ff99ff",
+        "label": "Terra Firma, tree height gain (2020 height) - 3m trees (73)",
+    },
+    74: {
+        "value": 74,
+        "color": "#fc92fc",
+        "label": "Terra Firma, tree height gain (2020 height) - 4m trees (74)",
+    },
+    75: {
+        "value": 75,
+        "color": "#f98bf9",
+        "label": "Terra Firma, tree height gain (2020 height) - 5m trees (75)",
+    },
+    76: {
+        "value": 76,
+        "color": "#f685f6",
+        "label": "Terra Firma, tree height gain (2020 height) - 6m trees (76)",
+    },
+    77: {
+        "value": 77,
+        "color": "#f37ef3",
+        "label": "Terra Firma, tree height gain (2020 height) - 7m trees (77)",
+    },
+    78: {
+        "value": 78,
+        "color": "#f077f0",
+        "label": "Terra Firma, tree height gain (2020 height) - 8m trees (78)",
+    },
+    79: {
+        "value": 79,
+        "color": "#ed71ed",
+        "label": "Terra Firma, tree height gain (2020 height) - 9m trees (79)",
+    },
+    80: {
+        "value": 80,
+        "color": "#ea6aea",
+        "label": "Terra Firma, tree height gain (2020 height) - 10m trees (80)",
+    },
+    81: {
+        "value": 81,
+        "color": "#e763e7",
+        "label": "Terra Firma, tree height gain (2020 height) - 11m trees (81)",
+    },
+    82: {
+        "value": 82,
+        "color": "#e45de4",
+        "label": "Terra Firma, tree height gain (2020 height) - 12m trees (82)",
+    },
+    83: {
+        "value": 83,
+        "color": "#e156e1",
+        "label": "Terra Firma, tree height gain (2020 height) - 13m trees (83)",
+    },
+    84: {
+        "value": 84,
+        "color": "#de4fde",
+        "label": "Terra Firma, tree height gain (2020 height) - 14m trees (84)",
+    },
+    85: {
+        "value": 85,
+        "color": "#db49db",
+        "label": "Terra Firma, tree height gain (2020 height) - 15m trees (85)",
+    },
+    86: {
+        "value": 86,
+        "color": "#d842d8",
+        "label": "Terra Firma, tree height gain (2020 height) - 16m trees (86)",
+    },
+    87: {
+        "value": 87,
+        "color": "#d53bd5",
+        "label": "Terra Firma, tree height gain (2020 height) - 17m trees (87)",
+    },
+    88: {
+        "value": 88,
+        "color": "#d235d2",
+        "label": "Terra Firma, tree height gain (2020 height) - 18m trees (88)",
+    },
+    89: {
+        "value": 89,
+        "color": "#cf2ecf",
+        "label": "Terra Firma, tree height gain (2020 height) - 19m trees (89)",
+    },
+    90: {
+        "value": 90,
+        "color": "#cc27cc",
+        "label": "Terra Firma, tree height gain (2020 height) - 20m trees (90)",
+    },
+    91: {
+        "value": 91,
+        "color": "#c921c9",
+        "label": "Terra Firma, tree height gain (2020 height) - 21m trees (91)",
+    },
+    92: {
+        "value": 92,
+        "color": "#c61ac6",
+        "label": "Terra Firma, tree height gain (2020 height) - 22m trees (92)",
+    },
+    93: {
+        "value": 93,
+        "color": "#c313c3",
+        "label": "Terra Firma, tree height gain (2020 height) - 23m trees (93)",
+    },
+    94: {
+        "value": 94,
+        "color": "#c00dc0",
+        "label": "Terra Firma, tree height gain (2020 height) - 24m trees (94)",
+    },
+    95: {
+        "value": 95,
+        "color": "#bd06bd",
+        "label": "Terra Firma, tree height gain (2020 height) - 25m trees (95)",
+    },
+    96: {
+        "value": 96,
+        "color": "#bb00bb",
+        "label": "Terra Firma, tree height gain (2020 height) - >25m trees (96)",
+    },
+    100: {
+        "value": 100,
+        "color": "#bfc0c0",
+        "label": "Wetland, salt pan - 3% short veg. cover (100)",
+    },
+    101: {
+        "value": 101,
+        "color": "#b7bdc2",
+        "label": "Wetland, salt pan - 7% short veg. cover (101)",
+    },
+    102: {
+        "value": 102,
+        "color": "#afbbc4",
+        "label": "Wetland, sparse vegetation - 11% short veg. cover (102)",
+    },
+    103: {
+        "value": 103,
+        "color": "#a8b8c6",
+        "label": "Wetland, sparse vegetation - 15% short veg. cover (103)",
+    },
+    104: {
+        "value": 104,
+        "color": "#a0b6c9",
+        "label": "Wetland, sparse vegetation - 19% short veg. cover (104)",
+    },
+    105: {
+        "value": 105,
+        "color": "#99b3cb",
+        "label": "Wetland, sparse vegetation - 23% short veg. cover (105)",
+    },
+    106: {
+        "value": 106,
+        "color": "#91b1cd",
+        "label": "Wetland, sparse vegetation - 27% short veg. cover (106)",
+    },
+    107: {
+        "value": 107,
+        "color": "#89afd0",
+        "label": "Wetland, sparse vegetation - 31% short veg. cover (107)",
+    },
+    108: {
+        "value": 108,
+        "color": "#82acd2",
+        "label": "Wetland, sparse vegetation - 35% short veg. cover (108)",
+    },
+    109: {
+        "value": 109,
+        "color": "#7aaad4",
+        "label": "Wetland, sparse vegetation - 39% short veg. cover (109)",
+    },
+    110: {
+        "value": 110,
+        "color": "#73a7d6",
+        "label": "Wetland, sparse vegetation - 43% short veg. cover (110)",
+    },
+    111: {
+        "value": 111,
+        "color": "#6ba5d9",
+        "label": "Wetland, sparse vegetation - 47% short veg. cover (111)",
+    },
+    112: {
+        "value": 112,
+        "color": "#64a3db",
+        "label": "Wetland, sparse vegetation - 51% short veg. cover (112)",
+    },
+    113: {
+        "value": 113,
+        "color": "#5ca0dd",
+        "label": "Wetland, sparse vegetation - 55% short veg. cover (113)",
+    },
+    114: {
+        "value": 114,
+        "color": "#549ee0",
+        "label": "Wetland, sparse vegetation - 59% short veg. cover (114)",
+    },
+    115: {
+        "value": 115,
+        "color": "#4d9be2",
+        "label": "Wetland, sparse vegetation - 63% short veg. cover (115)",
+    },
+    116: {
+        "value": 116,
+        "color": "#4599e4",
+        "label": "Wetland, sparse vegetation - 67% short veg. cover (116)",
+    },
+    117: {
+        "value": 117,
+        "color": "#3e96e6",
+        "label": "Wetland, sparse vegetation - 71% short veg. cover (117)",
+    },
+    118: {
+        "value": 118,
+        "color": "#3694e9",
+        "label": "Wetland, sparse vegetation - 75% short veg. cover (118)",
+    },
+    119: {
+        "value": 119,
+        "color": "#2e92eb",
+        "label": "Wetland, dense short vegetation - 79% short veg. cover (119)",
+    },
+    120: {
+        "value": 120,
+        "color": "#278fed",
+        "label": "Wetland, dense short vegetation - 83% short veg. cover (120)",
+    },
+    121: {
+        "value": 121,
+        "color": "#1f8df0",
+        "label": "Wetland, dense short vegetation - 87% short veg. cover (121)",
+    },
+    122: {
+        "value": 122,
+        "color": "#188af2",
+        "label": "Wetland, dense short vegetation - 91% short veg. cover (122)",
+    },
+    123: {
+        "value": 123,
+        "color": "#1088f4",
+        "label": "Wetland, dense short vegetation - 95% short veg. cover (123)",
+    },
+    124: {
+        "value": 124,
+        "color": "#0986f7",
+        "label": "Wetland, dense short vegetation - 100% short veg. cover (124)",
+    },
+    125: {
+        "value": 125,
+        "color": "#55a5a5",
+        "label": "Wetland, stable tree cover - 3m trees (125)",
+    },
+    126: {
+        "value": 126,
+        "color": "#53a1a2",
+        "label": "Wetland, stable tree cover - 4m trees (126)",
+    },
+    127: {
+        "value": 127,
+        "color": "#519e9f",
+        "label": "Wetland, stable tree cover - 5m trees (127)",
+    },
+    128: {
+        "value": 128,
+        "color": "#4f9b9c",
+        "label": "Wetland, stable tree cover - 6m trees (128)",
+    },
+    129: {
+        "value": 129,
+        "color": "#4d989a",
+        "label": "Wetland, stable tree cover - 7m trees (129)",
+    },
+    130: {
+        "value": 130,
+        "color": "#4b9597",
+        "label": "Wetland, stable tree cover - 8m trees (130)",
+    },
+    131: {
+        "value": 131,
+        "color": "#499294",
+        "label": "Wetland, stable tree cover - 9m trees (131)",
+    },
+    132: {
+        "value": 132,
+        "color": "#478f91",
+        "label": "Wetland, stable tree cover - 10m trees (132)",
+    },
+    133: {
+        "value": 133,
+        "color": "#458b8f",
+        "label": "Wetland, stable tree cover - 11m trees (133)",
+    },
+    134: {
+        "value": 134,
+        "color": "#43888c",
+        "label": "Wetland, stable tree cover - 12m trees (134)",
+    },
+    135: {
+        "value": 135,
+        "color": "#418589",
+        "label": "Wetland, stable tree cover - 13m trees (135)",
+    },
+    136: {
+        "value": 136,
+        "color": "#3f8286",
+        "label": "Wetland, stable tree cover - 14m trees (136)",
+    },
+    137: {
+        "value": 137,
+        "color": "#3d7f84",
+        "label": "Wetland, stable tree cover - 15m trees (137)",
+    },
+    138: {
+        "value": 138,
+        "color": "#3b7c81",
+        "label": "Wetland, stable tree cover - 16m trees (138)",
+    },
+    139: {
+        "value": 139,
+        "color": "#39797e",
+        "label": "Wetland, stable tree cover - 17m trees (139)",
+    },
+    140: {
+        "value": 140,
+        "color": "#37767b",
+        "label": "Wetland, stable tree cover - 18m trees (140)",
+    },
+    141: {
+        "value": 141,
+        "color": "#357279",
+        "label": "Wetland, stable tree cover - 19m trees (141)",
+    },
+    142: {
+        "value": 142,
+        "color": "#336f76",
+        "label": "Wetland, stable tree cover - 20m trees (142)",
+    },
+    143: {
+        "value": 143,
+        "color": "#316c73",
+        "label": "Wetland, stable tree cover - 21m trees (143)",
+    },
+    144: {
+        "value": 144,
+        "color": "#2f6970",
+        "label": "Wetland, stable tree cover - 22m trees (144)",
+    },
+    145: {
+        "value": 145,
+        "color": "#2d666e",
+        "label": "Wetland, stable tree cover - 23m trees (145)",
+    },
+    146: {
+        "value": 146,
+        "color": "#2b636b",
+        "label": "Wetland, stable tree cover - 24m trees (146)",
+    },
+    147: {
+        "value": 147,
+        "color": "#296068",
+        "label": "Wetland, stable tree cover - 25m trees (147)",
+    },
+    148: {
+        "value": 148,
+        "color": "#285d66",
+        "label": "Wetland, stable tree cover - >25m trees (148)",
+    },
+    149: {
+        "value": 149,
+        "color": "#bb93b0",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 3m trees (149)",
+    },
+    150: {
+        "value": 150,
+        "color": "#b78fac",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 4m trees (150)",
+    },
+    151: {
+        "value": 151,
+        "color": "#b48ca9",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 5m trees (151)",
+    },
+    152: {
+        "value": 152,
+        "color": "#b189a6",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 6m trees (152)",
+    },
+    153: {
+        "value": 153,
+        "color": "#ae85a2",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 7m trees (153)",
+    },
+    154: {
+        "value": 154,
+        "color": "#aa829f",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 8m trees (154)",
+    },
+    155: {
+        "value": 155,
+        "color": "#a77f9c",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 9m trees (155)",
+    },
+    156: {
+        "value": 156,
+        "color": "#a47b99",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 10m trees (156)",
+    },
+    157: {
+        "value": 157,
+        "color": "#a17895",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 11m trees (157)",
+    },
+    158: {
+        "value": 158,
+        "color": "#9e7592",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 12m trees (158)",
+    },
+    159: {
+        "value": 159,
+        "color": "#9a718f",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 13m trees (159)",
+    },
+    160: {
+        "value": 160,
+        "color": "#976e8c",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 14m trees (160)",
+    },
+    161: {
+        "value": 161,
+        "color": "#946b88",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 15m trees (161)",
+    },
+    162: {
+        "value": 162,
+        "color": "#916885",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 16m trees (162)",
+    },
+    163: {
+        "value": 163,
+        "color": "#8d6482",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 17m trees (163)",
+    },
+    164: {
+        "value": 164,
+        "color": "#8a617f",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 18m trees (164)",
+    },
+    165: {
+        "value": 165,
+        "color": "#875e7b",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 19m trees (165)",
+    },
+    166: {
+        "value": 166,
+        "color": "#845a78",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 20m trees (166)",
+    },
+    167: {
+        "value": 167,
+        "color": "#815775",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 21m trees (167)",
+    },
+    168: {
+        "value": 168,
+        "color": "#7d5472",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 22m trees (168)",
+    },
+    169: {
+        "value": 169,
+        "color": "#7a506e",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 23m trees (169)",
+    },
+    170: {
+        "value": 170,
+        "color": "#774d6b",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 24m trees (170)",
+    },
+    171: {
+        "value": 171,
+        "color": "#744a68",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - 25m trees (171)",
+    },
+    172: {
+        "value": 172,
+        "color": "#714765",
+        "label": "Wetland, tree cover with prev. disturb. (2020 height) - >25m trees (172)",
+    },
+    173: {
+        "value": 173,
+        "color": "#de7cbb",
+        "label": "Wetland, tree height gain (2020 height) - 3m trees (173)",
+    },
+    174: {
+        "value": 174,
+        "color": "#da77b7",
+        "label": "Wetland, tree height gain (2020 height) - 4m trees (174)",
+    },
+    175: {
+        "value": 175,
+        "color": "#d772b3",
+        "label": "Wetland, tree height gain (2020 height) - 5m trees (175)",
+    },
+    176: {
+        "value": 176,
+        "color": "#d46eaf",
+        "label": "Wetland, tree height gain (2020 height) - 6m trees (176)",
+    },
+    177: {
+        "value": 177,
+        "color": "#d169ab",
+        "label": "Wetland, tree height gain (2020 height) - 7m trees (177)",
+    },
+    178: {
+        "value": 178,
+        "color": "#ce64a8",
+        "label": "Wetland, tree height gain (2020 height) - 8m trees (178)",
+    },
+    179: {
+        "value": 179,
+        "color": "#cb60a4",
+        "label": "Wetland, tree height gain (2020 height) - 9m trees (179)",
+    },
+    180: {
+        "value": 180,
+        "color": "#c85ba0",
+        "label": "Wetland, tree height gain (2020 height) - 10m trees (180)",
+    },
+    181: {
+        "value": 181,
+        "color": "#c4579c",
+        "label": "Wetland, tree height gain (2020 height) - 11m trees (181)",
+    },
+    182: {
+        "value": 182,
+        "color": "#c15298",
+        "label": "Wetland, tree height gain (2020 height) - 12m trees (182)",
+    },
+    183: {
+        "value": 183,
+        "color": "#be4d95",
+        "label": "Wetland, tree height gain (2020 height) - 13m trees (183)",
+    },
+    184: {
+        "value": 184,
+        "color": "#bb4991",
+        "label": "Wetland, tree height gain (2020 height) - 14m trees (184)",
+    },
+    185: {
+        "value": 185,
+        "color": "#b8448d",
+        "label": "Wetland, tree height gain (2020 height) - 15m trees (185)",
+    },
+    186: {
+        "value": 186,
+        "color": "#b54089",
+        "label": "Wetland, tree height gain (2020 height) - 16m trees (186)",
+    },
+    187: {
+        "value": 187,
+        "color": "#b23b86",
+        "label": "Wetland, tree height gain (2020 height) - 17m trees (187)",
+    },
+    188: {
+        "value": 188,
+        "color": "#af3682",
+        "label": "Wetland, tree height gain (2020 height) - 18m trees (188)",
+    },
+    189: {
+        "value": 189,
+        "color": "#ab327e",
+        "label": "Wetland, tree height gain (2020 height) - 19m trees (189)",
+    },
+    190: {
+        "value": 190,
+        "color": "#a82d7a",
+        "label": "Wetland, tree height gain (2020 height) - 20m trees (190)",
+    },
+    191: {
+        "value": 191,
+        "color": "#a52976",
+        "label": "Wetland, tree height gain (2020 height) - 21m trees (191)",
+    },
+    192: {
+        "value": 192,
+        "color": "#a22473",
+        "label": "Wetland, tree height gain (2020 height) - 22m trees (192)",
+    },
+    193: {
+        "value": 193,
+        "color": "#9f1f6f",
+        "label": "Wetland, tree height gain (2020 height) - 23m trees (193)",
+    },
+    194: {
+        "value": 194,
+        "color": "#9c1b6b",
+        "label": "Wetland, tree height gain (2020 height) - 24m trees (194)",
+    },
+    195: {
+        "value": 195,
+        "color": "#991667",
+        "label": "Wetland, tree height gain (2020 height) - 25m trees (195)",
+    },
+    196: {
+        "value": 196,
+        "color": "#961264",
+        "label": "Wetland, tree height gain (2020 height) - >25m trees (196)",
+    },
+    208: {
+        "value": 208,
+        "color": "#040464",
+        "label": "Open surface water, permanent water (208)",
+    },
+    209: {
+        "value": 209,
+        "color": "#0000ff",
+        "label": "Open surface water, persistent water loss (209)",
+    },
+    210: {
+        "value": 210,
+        "color": "#000000",
+        "label": "Open surface water, persistent water gain (210)",
+    },
+    211: {
+        "value": 211,
+        "color": "#000000",
+        "label": "Open surface water, variable water (211)",
+    },
+    240: {
+        "value": 240,
+        "color": "#ff2828",
+        "label": "Short veg. after tree loss (240)",
+    },
+    241: {"value": 241, "color": "#ffffff", "label": "Snow/ice, stable (241)"},
+    242: {"value": 242, "color": "#d0ffff", "label": "Snow/ice, gain (242)"},
+    243: {"value": 243, "color": "#ffe0d0", "label": "Snow/ice, loss (243)"},
+    244: {"value": 244, "color": "#ff7d00", "label": "Cropland, Stable (244)"},
+    245: {"value": 245, "color": "#ffff00", "label": "Cropland, gain from trees (245)"},
+    246: {
+        "value": 246,
+        "color": "#c86400",
+        "label": "Cropland, gain from wetland veg (246)",
+    },
+    247: {"value": 247, "color": "#fac800", "label": "Cropland, gain from other (247)"},
+    248: {"value": 248, "color": "#afcd96", "label": "Cropland, loss to tree (248)"},
+    249: {
+        "value": 249,
+        "color": "#afcd96",
+        "label": "Cropland, loss to short veg/other (249)",
+    },
+    250: {"value": 250, "color": "#64dcdc", "label": "Built-up, stable built-up (250)"},
+    251: {"value": 251, "color": "#00ffff", "label": "Built-up, gain from trees (251)"},
+    252: {"value": 252, "color": "#00ffff", "label": "Built-up, gain from crop (252)"},
+    253: {"value": 253, "color": "#00ffff", "label": "Built-up, gain from other (253)"},
+    254: {"value": 254, "color": "#111133", "label": "Ocean (254)"},
+    255: {"value": 255, "color": "#000000", "label": "No data (255)"},
+}

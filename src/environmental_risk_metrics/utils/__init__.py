@@ -9,7 +9,7 @@ from shapely.geometry import shape
 from .metric_calculator import calculate_metrics
 from .planetary_computer import get_planetary_computer_items
 
-__all__ = ['calculate_metrics', 'get_planetary_computer_items']
+__all__ = ["calculate_metrics", "get_planetary_computer_items", "ensure_geometry_crs", "get_centroid_of_geometry"]
 
 logger = logging.getLogger(__name__)
 
@@ -96,3 +96,13 @@ def ensure_geometry_crs(
 
     logger.error("Unsupported geometry format")
     raise ValueError("Unsupported geometry format")
+
+
+def get_centroid_of_geometry(
+    geometry: Union[dict, gpd.GeoDataFrame, "shapely.geometry.base.BaseGeometry"],
+    source_crs: Optional[str] = None,
+    target_crs: str = "EPSG:4326",
+) -> tuple:
+    """Get the center of a geometry"""
+    geometry = ensure_geometry_crs(geometry, source_crs=source_crs, target_crs=target_crs)
+    return geometry.centroid.x, geometry.centroid.y

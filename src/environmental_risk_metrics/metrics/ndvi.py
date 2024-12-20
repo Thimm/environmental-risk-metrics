@@ -334,7 +334,7 @@ class Sentinel2(BaseEnvironmentalMetric):
     ) -> pd.DataFrame:
         """Get mean NDVI values for a given polygon"""
         polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
-        return self.calculate_mean_ndvi(
+        mean_ndvi_df = self.calculate_mean_ndvi(
             polygon=polygon,
             polygon_crs=polygon_crs,
             interpolate=interpolate,
@@ -342,6 +342,10 @@ class Sentinel2(BaseEnvironmentalMetric):
             end_date=end_date,
             all_touched=all_touched,
         )
+        mean_ndvi_df["mean_ndvi"] = mean_ndvi_df["mean_ndvi"].round(2)
+        mean_ndvi_df = mean_ndvi_df.reset_index(names="date")
+        mean_ndvi_dict = mean_ndvi_df.to_dict(orient="records")
+        return mean_ndvi_dict
 
 
 def interpolate_ndvi(df: pd.DataFrame, start_date: str, end_date: str):
