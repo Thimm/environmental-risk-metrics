@@ -1,19 +1,18 @@
 [project]
 name = "environmental-risk-metrics"
-version = "0.1.6"
+version = "0.1.11"
 description = "Calculate environmental risk metrics for a given polygon"
 readme = "README.md"
 authors = [
     { name = "Thimm Zwiener", email = "zwiener@gmail.com" },
     { name = "Thimm Zwiener", email = "thimm@regenrate.com" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "geopandas>=1.0.1",
     "geopy>=2.4.1",
     "leafmap>=0.42.5",
     "localtileserver>=0.10.5",
-    "odc-algo>=0.2.3",
     "odc-stac>=0.3.10",
     "pint>=0.24.4",
     "pint-pandas>=0.6.2",

@@ -3,6 +3,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 import geopandas as gpd
+import matplotlib
 import matplotlib.pyplot as plt
 import odc
 import odc.stac
@@ -19,16 +20,23 @@ from environmental_risk_metrics.utils.planetary_computer import (
     get_planetary_computer_items,
 )
 
+matplotlib.use(backend='Agg')
+
 logger = logging.getLogger(__name__)
 
 
 class Sentinel2(BaseEnvironmentalMetric):
     def __init__(
         self,
+        start_date: str,
+        end_date: str, 
+        polygon: dict,
+        polygon_crs: str,
         resolution: int = 10,
         entire_image_cloud_cover_threshold: int = 20,
         cropped_image_cloud_cover_threshold: int = 80,
         max_workers: int = 10,
+        is_bare_soil_threshold: float = 0.2,
     ):
         sources = [
             "https://planetarycomputer.microsoft.com/api/stac/v1",
@@ -42,45 +50,46 @@ class Sentinel2(BaseEnvironmentalMetric):
         self.entire_image_cloud_cover_threshold = entire_image_cloud_cover_threshold
         self.cropped_image_cloud_cover_threshold = cropped_image_cloud_cover_threshold
         self.max_workers = max_workers
+        self.start_date = start_date
+        self.end_date = end_date
+        self.polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
+        self.polygon_crs = polygon_crs
+        self.items = None
+        self.xarray_data = None
+        self.ndvi_data = None
+        self.ndvi_thumbnails_data = None
+        self.mean_ndvi_data = None
+        self.is_bare_soil_threshold = is_bare_soil_threshold
         logger.debug("Initializing Sentinel2 client")
 
     def get_items(
         self,
-        start_date: str,
-        end_date: str,
-        polygon: dict,
-        polygon_crs: str,
         entire_image_cloud_cover_threshold: int = 20,
     ) -> list[pystac.Item]:
         """
         Search for Sentinel-2 items within a given date range and polygon.
 
         Args:
-            start_date: Start date for the search (YYYY-MM-DD)
-            end_date: End date for the search (YYYY-MM-DD)
-            polygon: GeoJSON polygon to intersect with the search
             entire_image_cloud_cover_threshold: Maximum cloud cover percentage to include in the search
             cropped_image_cloud_cover_threshold: Maximum cloud cover within a cropped image to include in the search
 
         Returns:
             List of STAC items matching the search criteria
         """
-        polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
+        if self.items is not None:
+            return self.items
+
         self.items = get_planetary_computer_items(
             collections=self.collections,
-            start_date=start_date,
-            end_date=end_date,
-            polygon=polygon,
+            start_date=self.start_date,
+            end_date=self.end_date,
+            polygon=self.polygon,
             entire_image_cloud_cover_threshold=entire_image_cloud_cover_threshold,
         )
         return self.items
 
     def load_xarray(
         self,
-        start_date: str,
-        end_date: str,
-        polygon: dict,
-        polygon_crs: str,
         bands: list[str] = ["B02", "B03", "B04", "B08"],
         show_progress: bool = True,
         filter_cloud_cover: bool = True,
@@ -88,9 +97,6 @@ class Sentinel2(BaseEnvironmentalMetric):
         """Load Sentinel-2 data for a given date range and polygon into an xarray Dataset.
 
         Args:
-            start_date: Start date for the search (YYYY-MM-DD)
-            end_date: End date for the search (YYYY-MM-DD)
-            polygon: GeoJSON polygon to intersect with the se   arch
             bands: List of band names to load. Defaults to ["B02", "B03", "B04", "B08"]
             resolution: Resolution in meters. Defaults to 10
             max_workers: Maximum number of workers to use for loading the data
@@ -102,15 +108,12 @@ class Sentinel2(BaseEnvironmentalMetric):
         Returns:
             xarray Dataset containing the Sentinel-2 data
         """
+        if self.xarray_data is not None:
+            return self.xarray_data
         logger.debug(
             f"Loading Sentinel-2 data for bands {bands} at {self.resolution}m resolution"
         )
-        polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
         items = self.get_items(
-            start_date=start_date,
-            end_date=end_date,
-            polygon=polygon,
-            polygon_crs=polygon_crs,
             entire_image_cloud_cover_threshold=self.entire_image_cloud_cover_threshold,
         )
 
@@ -135,7 +138,7 @@ class Sentinel2(BaseEnvironmentalMetric):
             bands=bands + ["SCL"],
             resolution=self.resolution,
             pool=thread_pool,
-            geopolygon=polygon,
+            geopolygon=self.polygon,
             progress=progress if show_progress else None,
         )
 
@@ -157,22 +160,16 @@ class Sentinel2(BaseEnvironmentalMetric):
             ds = ds.where(cloud_clear_mask, drop=True)
 
         logger.debug("Successfully loaded Sentinel-2 data")
-        return ds
+        self.xarray_data = ds
+        return self.xarray_data
 
     def load_ndvi_images(
         self,
-        start_date: str,
-        end_date: str,
-        polygon: dict,
-        polygon_crs: str,
         filter_cloud_cover: bool = True,
     ) -> xr.Dataset:
         """Load NDVI data for a given date range and polygon.
 
         Args:
-            start_date: Start date for the search (YYYY-MM-DD)
-            end_date: End date for the search (YYYY-MM-DD)
-            polygon: GeoJSON polygon to intersect with the search
             max_workers: Maximum number of workers to use for loading the data
             entire_image_cloud_cover_threshold: Maximum cloud cover percentage to include in the search
             cropped_image_cloud_cover_threshold: Maximum cloud cover within a cropped image to include in the search
@@ -180,26 +177,21 @@ class Sentinel2(BaseEnvironmentalMetric):
         Returns:
             xarray Dataset containing the NDVI data
         """
-        polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
+        if self.ndvi_data is not None:
+            return self.ndvi_data
         logger.debug("Loading NDVI data")
         ds = self.load_xarray(
-            start_date=start_date,
-            end_date=end_date,
-            polygon=polygon,
-            polygon_crs=polygon_crs,
             bands=["B08", "B04"],
             filter_cloud_cover=filter_cloud_cover,
         )
         logger.debug("Calculating NDVI from bands B08 and B04")
         ndvi = (ds.B08 - ds.B04) / (ds.B08 + ds.B04)
         logger.debug("Successfully calculated NDVI")
-        return ndvi
+        self.ndvi_data = ndvi
+        return self.ndvi_data
 
-    @staticmethod
     def ndvi_thumbnails(
-        ndvi: xr.DataArray,
-        polygon: dict,
-        polygon_crs: str,
+        self,
         vmin: float = -0.2,
         vmax: float = 0.8,
         boundary_color: str = "red",
@@ -233,12 +225,13 @@ class Sentinel2(BaseEnvironmentalMetric):
         Returns:
             dict: Dictionary with timestamps as keys and image bytes as values
         """
+        if self.ndvi_thumbnails_data is not None:
+            return self.ndvi_thumbnails_data
+        ndvi = self.load_ndvi_images()
         images = {}
 
         # Convert polygon coordinates to shapely Polygon
-        coords = polygon["geometry"]["coordinates"][0]
-        poly = Polygon(coords)
-        gdf = gpd.GeoDataFrame(geometry=[poly], crs=polygon_crs)
+        gdf = gpd.GeoDataFrame(geometry=[self.polygon], crs=self.polygon_crs)
         crs = ndvi.coords["spatial_ref"].values.item()
         gdf = gdf.to_crs(crs)  # Convert to UTM zone 32N to match the NDVI data
 
@@ -271,45 +264,35 @@ class Sentinel2(BaseEnvironmentalMetric):
             # Close figure to free memory
             plt.close(fig)
 
-        return images
+        self.ndvi_thumbnails_data = images
+        return self.ndvi_thumbnails_data
 
     def calculate_mean_ndvi(
         self,
-        polygon: dict,
-        polygon_crs: str,
         interpolate: bool = False,
-        start_date: str = None,
-        end_date: str = None,
         all_touched: bool = True,
     ) -> pd.DataFrame:
         """
         Calculate mean NDVI value for the given polygon at each timestamp
 
         Args:
-            polygon (dict): GeoJSON polygon
-            polygon_crs (str): CRS of the input polygon
             interpolate (bool): Whether to interpolate missing values
-            start_date (str): Start date for interpolation
-            end_date (str): End date for interpolation
             all_touched (bool): Whether to use all touched for clipping
         Returns:
             pd.DataFrame: DataFrame with mean NDVI values
         """
+        if self.mean_ndvi_data is not None:
+            return self.mean_ndvi_data
         logger.debug("Calculating mean NDVI values for polygon")
 
-        ndvi_images = self.load_ndvi_images(
-            polygon=polygon,
-            polygon_crs=polygon_crs,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        ndvi_images = self.load_ndvi_images()
 
         # Convert to rioxarray and clip once for all timestamps
         crs = ndvi_images.coords["spatial_ref"].values.item()
 
         ndvi_images = ndvi_images.rio.write_crs(crs)
         clipped_data = ndvi_images.rio.clip(
-            [polygon], polygon_crs, all_touched=all_touched
+            [self.polygon], self.polygon_crs, all_touched=all_touched
         )
 
         # Calculate means for all timestamps at once
@@ -317,39 +300,33 @@ class Sentinel2(BaseEnvironmentalMetric):
 
         # Create dictionary mapping timestamps to means
         mean_ndvi = pd.DataFrame(
-            mean_values, columns=["mean_ndvi"], index=clipped_data.time.values
+            mean_values, columns=["ndvi"], index=clipped_data.time.values
         )
         mean_ndvi.index = pd.to_datetime(mean_ndvi.index).date
+        mean_ndvi["ndvi"] = round(mean_ndvi["ndvi"], 2)
+
         if interpolate:
-            if not (start_date or end_date):
-                raise ValueError("Interpolation requires start_date and end_date")
-            else:
-                mean_ndvi = interpolate_ndvi(mean_ndvi, start_date, end_date)
+            mean_ndvi = interpolate_ndvi(mean_ndvi, self.start_date, self.end_date)
+
+        if self.is_bare_soil_threshold:
+            mean_ndvi["is_bare_soil"] = mean_ndvi["ndvi"] < self.is_bare_soil_threshold
 
         logger.debug(f"Calculated mean NDVI for {len(mean_ndvi)} timestamps")
-        return mean_ndvi
+        self.mean_ndvi_data = mean_ndvi
+        return self.mean_ndvi_data
 
     def get_data(
         self,
-        start_date: str,
-        end_date: str,
-        polygon: dict,
-        polygon_crs: str,
         all_touched: bool = True,
         interpolate: bool = True,
     ) -> pd.DataFrame:
         """Get mean NDVI values for a given polygon"""
-        polygon = self._preprocess_geometry(geometry=polygon, source_crs=polygon_crs)
         mean_ndvi_df = self.calculate_mean_ndvi(
-            polygon=polygon,
-            polygon_crs=polygon_crs,
             interpolate=interpolate,
-            start_date=start_date,
-            end_date=end_date,
             all_touched=all_touched,
         )
-        mean_ndvi_df["mean_ndvi"] = mean_ndvi_df["mean_ndvi"].round(2)
         mean_ndvi_df = mean_ndvi_df.reset_index(names="date")
+        mean_ndvi_df.index = pd.to_datetime(mean_ndvi_df.index).date
         mean_ndvi_dict = mean_ndvi_df.to_dict(orient="records")
         return mean_ndvi_dict
 
@@ -369,5 +346,6 @@ def interpolate_ndvi(df: pd.DataFrame, start_date: str, end_date: str):
     date_range = pd.date_range(
         start=pd.to_datetime(start_date), end=pd.to_datetime(end_date), freq="D"
     )
-    df = df.reindex(date_range).interpolate(method="linear", limit_direction="both")
+    df = df.reindex(date_range)
+    df['interpolated_ndvi'] = round(df['ndvi'].interpolate(method="linear", limit_direction="both"), 2)
     return df
