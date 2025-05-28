@@ -11,6 +11,7 @@ import planetary_computer
 import rioxarray
 import xarray as xr
 from pystac.item import Item
+from tenacity import retry, stop_after_attempt, wait_exponential
 from tqdm import tqdm
 
 from environmental_risk_metrics.base import BaseEnvironmentalMetric
@@ -234,14 +235,17 @@ class BaseLandCover(BaseEnvironmentalMetric):
             signed_items = [planetary_computer.sign(item) for item in items]
             thread_pool = ThreadPoolExecutor(max_workers=self.max_workers)
 
-            ds = odc.stac.load(
-                signed_items,
-                bands=[self.band_name],
-                resolution=self.resolution,
-                pool=thread_pool,
-                geopolygon=polygon,
-                progress=tqdm if self.show_progress else None,
-            )
+            @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+            def _load_data():
+                return odc.stac.load(
+                    signed_items,
+                    bands=[self.band_name],
+                    resolution=self.resolution,
+                    pool=thread_pool,
+                    geopolygon=polygon,
+                    progress=tqdm if self.show_progress else None,
+                )
+            ds = _load_data()
             ds_list.append(ds)
         return ds_list
 
@@ -409,7 +413,11 @@ class OpenLandMapLandCover(BaseLandCover):
             )
             for year in available_years:
                 url = OPENLANDMAP_LC[year]
-                da = rioxarray.open_rasterio(url)
+                @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+                def _open_rasterio_with_retry(url_param):
+                    return rioxarray.open_rasterio(url_param)
+                
+                da = _open_rasterio_with_retry(url)
                 da = da.assign_coords(time=pd.Timestamp(f"{year}-01-01"))
                 da = da.rio.clip_box(
                     minx=minx, miny=miny, maxx=maxx, maxy=maxy, crs=self.gdf.crs
