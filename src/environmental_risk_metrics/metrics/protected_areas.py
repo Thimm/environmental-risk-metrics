@@ -12,7 +12,7 @@ from environmental_risk_metrics.base import BaseEnvironmentalMetric
 class RamsarProtectedAreas(BaseEnvironmentalMetric):
     """Class for analyzing protected areas data from Ramsar sites"""
 
-    def __init__(self):
+    def __init__(self, gdf: gpd.GeoDataFrame):
         sources = [
             "https://rsis.ramsar.org/geoserver/wms",
             "https://rsis.ramsar.org/geoserver/wms",
@@ -27,9 +27,9 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
                 "ramsar_sites.parquet",
             )
         ).to_crs("EPSG:3857")
-
+        self.gdf = gdf.to_crs("EPSG:3857")
     def get_nearest_ramsar_sites(
-        self, polygon: dict, polygon_crs: str, limit: int = 5
+        self, limit: int = 5
     ) -> List[Dict]:
         """
         Get nearest Ramsar protected sites for a given geometry
@@ -42,34 +42,31 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
             List of dictionaries containing nearest Ramsar sites with distances and descriptions
         """
         # Convert geometry to GeoDataFrame and get centroid
-        polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        gdf = gpd.GeoDataFrame([polygon], crs="EPSG:4326", columns=["geometry"])
-        gdf = gdf.to_crs("EPSG:3857")
-        center_point = gdf.centroid
-        center_point_df = gpd.GeoDataFrame(geometry=[center_point[0]], crs="EPSG:3857")
+        self.gdf["center_point"] = self.gdf.centroid
+        results_list = []
+        for center_point in self.gdf["center_point"]:
+            # Find nearest sites
+            nearest_sites = gpd.sjoin_nearest(
+                left_df=self.ramsar_sites,
+                right_df=gpd.GeoDataFrame(geometry=[center_point], crs="EPSG:3857"),
+                how="inner",
+                max_distance=None,
+                distance_col="distance",
+            ).nsmallest(limit, "distance")
 
-        # Find nearest sites
-        nearest_sites = gpd.sjoin_nearest(
-            self.ramsar_sites,
-            center_point_df,
-            how="inner",
-            max_distance=None,
-            distance_col="distance",
-        ).nsmallest(limit, "distance")
-
-        results = []
-        for _, site in nearest_sites.iterrows():
-            description = self._get_site_description(site["ramsarid"])
-            results.append(
-                {
-                    "name": site["officialna"],
-                    "distance_km": round(site["distance"] / 1000, 2),
-                    "description": description,
-                    "ramsar_id": site["ramsarid"],
-                }
-            )
-
-        return results
+            results = []
+            for _, site in nearest_sites.iterrows():
+                description = self._get_site_description(site["ramsarid"])
+                results.append(
+                    {
+                        "name": site["officialna"],
+                        "distance_km": round(site["distance"] / 1000, 2),
+                        "description": description,
+                        "ramsar_id": site["ramsarid"],
+                    }
+                )
+            results_list.append(results)
+        return results_list
 
     def _get_site_description(self, ramsar_id: int) -> str:
         """
@@ -95,13 +92,10 @@ class RamsarProtectedAreas(BaseEnvironmentalMetric):
         return None
 
     def get_data(
-        self, polygon: dict, polygon_crs: str, limit: int = 5, **kwargs
+        self, limit: int = 5, **kwargs
     ) -> List[Dict]:
         """Get nearest Ramsar protected sites for a given geometry"""
-        polygon = self._preprocess_geometry(polygon, source_crs=polygon_crs)
-        return self.get_nearest_ramsar_sites(
-            polygon=polygon, polygon_crs=polygon_crs, limit=limit
-        )
+        return self.get_nearest_ramsar_sites(limit=limit)
 
     def create_map(self, polygons: dict | list, polygon_crs: str, **kwargs) -> None:
         """Create a map for the Ramsar protected areas data

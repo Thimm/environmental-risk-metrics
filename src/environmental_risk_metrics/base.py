@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from typing import Dict
 
+import geopandas as gpd
+
 from environmental_risk_metrics.legends import (
     convert_legend_to_value_color_dict,
     convert_legend_to_value_label_dict,
@@ -23,7 +25,7 @@ class BaseEnvironmentalMetric:
         description: str,
         target_crs: str = None,
         legend: dict = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize the metric with optional CRS override and legend
@@ -88,21 +90,28 @@ class BaseEnvironmentalMetric:
         raise NotImplementedError(
             f"create_map() is not implemented for {self.__class__.__name__}"
         )
-    
+
     def get_legend(self, **kwargs) -> Dict:
         """Get the legend for the metric"""
         if not self.legend:
             raise ValueError(f"Legend is not set for {self.__class__.__name__}")
-        
+
     def get_legend_labels_dict(self, **kwargs) -> Dict:
         """Get the legend labels for the metric"""
         return convert_legend_to_value_label_dict(self.legend)
-    
+
     def get_legend_colors(self, **kwargs) -> Dict:
         """Get the legend colors for the metric"""
         return convert_legend_to_value_color_dict(self.legend)
-        
-    def get_data_for_polygons(self, polygons: list, polygons_crs: str, concurrent = None, max_workers: int = 10, **kwargs) -> list:
+
+    def get_data_for_polygons(
+        self,
+        polygons: list,
+        polygons_crs: str,
+        concurrent=None,
+        max_workers: int = 10,
+        **kwargs,
+    ) -> list:
         """Get data for multiple geometries
 
         Args:
@@ -114,6 +123,19 @@ class BaseEnvironmentalMetric:
         Returns:
             List of dictionaries containing data for each geometry
         """
+        if not polygons:
+            raise ValueError("No polygons provided")
+        if not polygons_crs:
+            raise ValueError("No polygons CRS provided")
+        if isinstance(polygons, gpd.GeoDataFrame):
+            polygons = [
+                {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": x.geometry.__geo_interface__,
+                }
+                for x in polygons.geometry
+            ]
         if not concurrent:
             return [
                 self.get_data(polygon=polygon, polygon_crs=polygons_crs, **kwargs)
@@ -121,9 +143,15 @@ class BaseEnvironmentalMetric:
             ]
         else:
             from concurrent.futures import ThreadPoolExecutor
+
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = [
-                    executor.submit(self.get_data, polygon=polygon, polygon_crs=polygons_crs, **kwargs)
+                    executor.submit(
+                        self.get_data,
+                        polygon=polygon,
+                        polygon_crs=polygons_crs,
+                        **kwargs,
+                    )
                     for polygon in polygons
                 ]
                 return [future.result() for future in futures]
