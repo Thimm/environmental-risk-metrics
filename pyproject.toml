@@ -9,22 +9,28 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "beautifulsoup4>=4.12.0",
     "geopandas>=1.0.1",
     "geopy>=2.4.1",
+    "imageio>=2.31.0",
+    "ipython>=8.0.0",
     "leafmap>=0.42.5",
-    "localtileserver>=0.10.5",
+    "matplotlib>=3.7.0",
+    "numpy>=1.24.0",
     "odc-stac>=0.3.10",
-    "pint>=0.24.4",
-    "pint-pandas>=0.6.2",
+    "pandas>=2.0.0",
     "planetary-computer>=1.0.0",
-    "plotly>=5.24.1",
     "pyarrow>=18.1.0",
-    "pydantic-pint>=0.1",
     "pygbif>=0.6.5",
+    "pyproj>=3.5.0",
     "pystac-client>=0.8.5",
     "rasterstats>=0.20.0",
+    "requests>=2.31.0",
     "rioxarray>=0.18.1",
-    "scipy>=1.14.1",
+    "shapely>=2.0.0",
+    "tenacity>=8.2.0",
+    "tqdm>=4.65.0",
+    "xarray>=2023.1.0",
 ]
 
 [build-system]
