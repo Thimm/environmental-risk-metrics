@@ -1,7 +1,7 @@
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import geopandas as gpd
 import leafmap
@@ -11,18 +11,15 @@ import planetary_computer
 import rioxarray
 import xarray as xr
 from pystac.item import Item
+from shapely.geometry import box
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tqdm import tqdm
 
 from environmental_risk_metrics.base import BaseEnvironmentalMetric
 from environmental_risk_metrics.legends.land_use_change import (
-    ESA_LAND_COVER_LEGEND,
-    ESRI_LAND_COVER_LEGEND,
-    OPENLANDMAP_LC_LEGEND,
-)
-from environmental_risk_metrics.utils.planetary_computer import (
-    get_planetary_computer_items,
-)
+    ESA_LAND_COVER_LEGEND, ESRI_LAND_COVER_LEGEND, OPENLANDMAP_LC_LEGEND)
+from environmental_risk_metrics.utils.planetary_computer import \
+    get_planetary_computer_items
 
 logger = logging.getLogger(name=__name__)
 
@@ -184,17 +181,27 @@ class BaseLandCover(BaseEnvironmentalMetric):
         legend: Dict[int, str],
         sources: List[str],
         description: str,
-        resolution: int,
         max_workers: int = 10,
         show_progress: bool = True,
     ) -> None:
+        """Initializes the BaseLandCover class.
+
+        Args:
+            collections: List of Planetary Computer collections to use.
+            band_name: Name of the band to use from the collections.
+            name: Name of the land cover metric.
+            legend: Legend for the land cover classes.
+            sources: List of data sources.
+            description: Description of the metric.
+            max_workers: Maximum number of workers for parallel processing.
+            show_progress: Whether to show a progress bar.
+        """
         super().__init__(sources=sources, description=description)
         self.collections = collections
         self.band_name = band_name
         self.name = name
         self.legend = legend
         self.sources = sources
-        self.resolution = resolution
         self.max_workers = max_workers
         self.show_progress = show_progress
 
@@ -208,46 +215,6 @@ class BaseLandCover(BaseEnvironmentalMetric):
             end_date=end_date,
             polygon=polygon,
         )
-
-    def load_xarray(
-        self,
-        start_date: str,
-        end_date: str,
-     
-    ) -> xr.Dataset:
-        logger.debug(
-            f"Loading {self.collections} data at {self.resolution}m resolution"
-        )
-        ds_list = []
-        for polygon in self.gdf["geometry"]:
-            items = self.get_items(
-                start_date=start_date,
-                end_date=end_date,
-                polygon=polygon,
-                polygon_crs=self.gdf.crs,
-            )
-
-            if not items:
-                raise ValueError(
-                    f"No {self.name} items found for the given date range and polygon"
-                )
-
-            signed_items = [planetary_computer.sign(item) for item in items]
-            thread_pool = ThreadPoolExecutor(max_workers=self.max_workers)
-
-            @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-            def _load_data():
-                return odc.stac.load(
-                    signed_items,
-                    bands=[self.band_name],
-                    resolution=self.resolution,
-                    pool=thread_pool,
-                    geopolygon=polygon,
-                    progress=tqdm if self.show_progress else None,
-                )
-            ds = _load_data()
-            ds_list.append(ds)
-        return ds_list
 
     def getlegend(self) -> Dict[int, str]:
         return self.legend
@@ -267,65 +234,143 @@ class BaseLandCover(BaseEnvironmentalMetric):
             )
         return ds_list
 
-    def get_land_use_class_percentages(
+    def get_land_use_metrics(
         self,
         start_date: str,
         end_date: str,
-      
         all_touched: bool = True,
-    ) -> pd.DataFrame:
-        ds_list = self.load_xarray(
+        expected_total_ha: float = None,
+    ) -> List[Dict[str, Any]]:
+        """Calculate land use class areas in hectares using rasterstats zonal_stats.
+
+        Args:
+            start_date: Start date for the analysis.
+            end_date: End date for the analysis.
+            all_touched: Whether to include all pixels touching the geometry.
+            expected_total_ha: Optional, if provided, scales the output to match this area.
+
+        Returns:
+            A list of dictionaries, one for each polygon, containing years as keys and land cover areas in hectares.
+        """
+        from rasterstats import zonal_stats
+
+        # Get all items in the date range
+        items = self.get_items(
             start_date=start_date,
             end_date=end_date,
+            polygon=self.gdf,
+            polygon_crs=self.gdf.crs,
         )
-        percentage_list = []
-        for ds, polygon in zip(ds_list, self.gdf["geometry"]):
-            crs = ds.coords["spatial_ref"].values.item()
-            clipped_data = ds.rio.write_crs(crs).rio.clip(
-                [polygon], self.gdf.crs, all_touched=all_touched
-            )
-            clipped_data = clipped_data.where(clipped_data[self.band_name] != 0)
+        if not items:
+            raise ValueError("No items found for the given date range and polygon")
 
-            clipped_data_df = clipped_data.to_dataframe()
-            clipped_data_df[self.band_name] = clipped_data_df[self.band_name].map(
-                self.get_legend_labels_dict()
-            )
-            grouped = clipped_data_df.groupby("time")
-            value_counts = grouped[self.band_name].value_counts()
-            total_counts = grouped[self.band_name].count()
+        # Get the CRS from the first raster and ensure the GeoDataFrame is in the same CRS
+        import rasterio
+        with rasterio.open(items[0].assets[self.band_name].href) as src:
+            raster_crs = src.crs
+        gdf_raster_crs = self.gdf.to_crs(raster_crs)
 
-            percentage = (value_counts / total_counts).unstack(level=1)
-            percentage_list.append(round(percentage * 100, 2))
-        return percentage_list
+        # Get legend mapping
+        label_map = self.get_legend_labels_dict()
+        
+        # Calculate total areas in hectares
+        total_areas_ha = self.gdf.to_crs("EPSG:6933").area / 10000
+        
+        # Initialize results list - one dict per polygon
+        polygon_results = [{} for _ in range(len(self.gdf))]
+        
+        # Sort items by year to ensure consistent ordering
+        items_sorted = sorted(items, key=lambda item: pd.to_datetime(item.properties['start_datetime']).year)
+        
+        # Process each item
+        for item in items_sorted:
+            # Extract year from item properties
+            year = pd.to_datetime(item.properties['start_datetime']).year
+            
+            raster_path = item.assets[self.band_name].href
+            
+            # Count pixels per land cover class within each polygon
+            stats_dict = zonal_stats(
+                gdf_raster_crs,
+                raster_path,
+                categorical=True,
+                all_touched=all_touched,
+            )
+
+            areas_dict = []
+            for polygon_stats, total_area_ha in zip(stats_dict, total_areas_ha):
+                area_stats = {}
+                total_pixels = sum(polygon_stats.values())
+                for class_id, count in polygon_stats.items():
+                    area_stats[class_id] = round(count / total_pixels * total_area_ha, 2)
+                areas_dict.append(area_stats)
+        
+            # Remap class ids to labels using the legend and add to polygon results
+            for polygon_idx, area_stats in enumerate(areas_dict):
+                # Group areas by their mapped labels and sum them
+                grouped_areas = {}
+                for cid, area in area_stats.items():
+                    label = label_map.get(cid, str(cid))
+                    if label in grouped_areas:
+                        grouped_areas[label] += area
+                    else:
+                        grouped_areas[label] = area
+                
+                # Add this year's data to the corresponding polygon
+                polygon_results[polygon_idx][year] = grouped_areas
+            
+        return polygon_results
+
 
     def get_data(
         self,
         start_date: str,
         end_date: str,
         all_touched: bool = True,
-    ) -> Dict:
-        """Get land use class percentages for a given geometry"""
-        df_list =  self.get_land_use_class_percentages(
+    ) -> List[List[Dict[str, Any]]]:
+        """Get land use class areas for a given geometry.
+
+        Args:
+            start_date: Start date for the analysis.
+            end_date: End date for the analysis.
+            all_touched: Whether to include all pixels touching the geometry.
+
+        Returns:
+            A list of lists of dictionaries containing the land use class
+            areas in square meters for each polygon and time step.
+        """
+        area_dicts = self.get_land_use_metrics(
             start_date=start_date,
             end_date=end_date,
             all_touched=all_touched,
-        )   
-        df_list = [df.fillna(0) for df in df_list]
-        df_list = [df.reset_index(names="date") for df in df_list]
-        all_records = [df.to_dict(orient="records") for df in df_list]
-
-        # Add all legend values with 0 for any missing classes
-        all_legend_values = self.get_legend_labels_dict().values()
-        for records_list in all_records:
-            for record in records_list:
-                for label in all_legend_values:
-                    if label not in record:
-                        record[label] = 0
-        return all_records
+        )
+        
+        # Get ESRI class labels (not the raw numbers)
+        esri_labels = list(ESRI_LAND_COVER_LEGEND.values())
+        esri_label_names = [label['label'] for label in esri_labels]
+        
+        # Process each polygon's data
+        for polygon_data in area_dicts:
+            # Process each year's data within the polygon
+            for year_data in polygon_data.values():
+                # Ensure all ESRI classes are present with 0 values if missing
+                for label_name in esri_label_names:
+                    if label_name not in year_data:
+                        year_data[label_name] = 0
+        
+        return area_dicts
 
 
 class EsaLandCover(BaseLandCover):
-    def __init__(self, gdf: gpd.GeoDataFrame, use_esri_classes: bool = False) -> None:
+    def __init__(
+        self,
+        gdf: gpd.GeoDataFrame,
+    ) -> None:
+        """Initializes the EsaLandCover class.
+
+        Args:
+            gdf: GeoDataFrame with the geometry to analyze.
+        """
         sources = [
             "https://planetarycomputer.microsoft.com/dataset/esa-cci-lc",
             "https://doi.org/10.24381/cds.006f2c9a",
@@ -337,15 +382,18 @@ class EsaLandCover(BaseLandCover):
             description=description,
             name="ESA Climate Change Initiative (CCI) Land Cover",
             band_name="lccs_class",
-            resolution=0.00009,
-            legend=ESA_LAND_COVER_LEGEND
-            if not use_esri_classes
-            else map_esa_to_esri_classes(),
+            legend=map_esa_to_esri_classes(),
         )
         self.gdf = gdf.to_crs(epsg=4326)
 
+
 class EsriLandCover(BaseLandCover):
-    def __init__(self, gdf: gpd.GeoDataFrame, use_esri_classes: bool = False) -> None:
+    def __init__(self, gdf: gpd.GeoDataFrame) -> None:
+        """Initializes the EsriLandCover class.
+
+        Args:
+            gdf: GeoDataFrame with the geometry to analyze.
+        """
         sources = [
             "https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02",
             "https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02",
@@ -358,13 +406,21 @@ class EsriLandCover(BaseLandCover):
             name="Esri Land Use",
             band_name="data",
             legend=ESRI_LAND_COVER_LEGEND,
-            resolution=10,
         )
         self.gdf = gdf.to_crs(epsg=4326)
 
+
 class OpenLandMapLandCover(BaseLandCover):
-    def __init__(self, gdf: gpd.GeoDataFrame, use_esri_classes: bool = False) -> None:
-        sources = [ 
+    def __init__(
+        self,
+        gdf: gpd.GeoDataFrame,
+    ) -> None:
+        """Initializes the OpenLandMapLandCover class.
+
+        Args:
+            gdf: GeoDataFrame with the geometry to analyze.
+        """
+        sources = [
             "https://glad.umd.edu/dataset/GLCLUC",
             "https://glad.umd.edu/dataset/GLCLUC",
         ]
@@ -375,85 +431,11 @@ class OpenLandMapLandCover(BaseLandCover):
             description=description,
             name="GLAD Land Use/Cover",
             band_name="data",
-            resolution=10,
-            legend=map_openlandmap_to_esri_classes()
-            if use_esri_classes
-            else OPENLANDMAP_LC_LEGEND,
+            legend=map_openlandmap_to_esri_classes(),
         )
         self.gdf = gdf.to_crs(epsg=4326)
-    def load_xarray(
-        self,
-        start_date: str,
-        end_date: str,
-    ) -> List[Item]:
-        """Override get_items to use GLAD land cover data instead of Planetary Computer"""
-        # Convert dates to years
-        start_year = str(pd.to_datetime(start_date).year)
-        end_year = str(pd.to_datetime(end_date).year)
 
-        # Get available years within range
-        available_years = [
-            y for y in OPENLANDMAP_LC.keys() if start_year <= y <= end_year
-        ]
 
-        if not available_years:
-            raise ValueError(
-                f"No GLAD data available between {start_year} and {end_year}"
-            )
-        
-        ds_list = []
-
-        # Load and merge data for all available years
-        for geometry in self.gdf["geometry"]:
-            data_arrays = []
-            minx, miny, maxx, maxy = (
-                gpd.GeoDataFrame([geometry], columns=["geometry"])
-                .set_geometry("geometry")
-                .bounds.iloc[0]
-            )
-            for year in available_years:
-                url = OPENLANDMAP_LC[year]
-                @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-                def _open_rasterio_with_retry(url_param):
-                    return rioxarray.open_rasterio(url_param)
-                
-                da = _open_rasterio_with_retry(url)
-                da = da.assign_coords(time=pd.Timestamp(f"{year}-01-01"))
-                da = da.rio.clip_box(
-                    minx=minx, miny=miny, maxx=maxx, maxy=maxy, crs=self.gdf.crs
-                )
-                data_arrays.append(da)
-            ds = xr.concat(data_arrays, dim="time")
-            ds = ds.squeeze()
-            ds_list.append(ds)
-        return ds_list
-
-    def get_land_use_class_percentages(
-        self,
-        start_date: str,
-        end_date: str,
-        all_touched: bool = True,
-    ) -> pd.DataFrame:
-        percentage_list = []
-        ds_list = self.load_xarray(
-            start_date=start_date,
-            end_date=end_date,
-        )
-        for ds, geometry in zip(ds_list, self.gdf["geometry"]):
-            clipped_data = ds.rio.clip(geometry, self.gdf.crs, all_touched=all_touched)
-            clipped_data_df = clipped_data.to_dataframe("class").reset_index()
-            clipped_data_df = clipped_data_df[clipped_data_df["class"] != 0]
-            clipped_data_df["class"] = clipped_data_df["class"].map(
-                self.get_legend_labels_dict()
-            )
-            grouped = clipped_data_df.groupby("time")
-            value_counts = grouped["class"].value_counts()
-            total_counts = grouped["class"].count()
-            percentage = (value_counts / total_counts).unstack(level=1)
-            percentage = percentage.fillna(0)
-            percentage = round(percentage * 100, 2)
-            percentage_list.append(percentage)
-        return percentage_list
 
     def create_map(self, polygons: dict | list, polygon_crs: str, **kwargs) -> None:
         """Create a map for the land use change data
@@ -505,6 +487,10 @@ class OpenLandMapLandCover(BaseLandCover):
         m.add_gdf(gdf, layer_name="Your Parcels", zoom_to_layer=True)
         
         return m
+
+
+        
+        
 
 
         
