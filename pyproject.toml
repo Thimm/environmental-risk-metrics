@@ -1,7 +1,7 @@
 [project]
 name = "environmental-risk-metrics"
-version = "0.2.2"
-description = "Calculate environmental risk metrics for a given polygon"
+version = "0.3.0"
+description = "Calculate environmentalrisk metrics for a given polygon"
 readme = "README.md"
 authors = [
     { name = "Thimm Zwiener", email = "zwiener@gmail.com" },
