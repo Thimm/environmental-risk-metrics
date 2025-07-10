@@ -1,6 +1,6 @@
 [project]
 name = "environmental-risk-metrics"
-version = "0.1.18"
+version = "0.2.2"
 description = "Calculate environmental risk metrics for a given polygon"
 readme = "README.md"
 authors = [

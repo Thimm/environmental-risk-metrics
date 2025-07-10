@@ -5,15 +5,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import geopandas as gpd
 import leafmap
-import odc.stac
 import pandas as pd
-import planetary_computer
-import rioxarray
+import rasterio
 import xarray as xr
+from IPython.display import display
 from pystac.item import Item
 from shapely.geometry import box
-from tenacity import retry, stop_after_attempt, wait_exponential
-from tqdm import tqdm
 
 from environmental_risk_metrics.base import BaseEnvironmentalMetric
 from environmental_risk_metrics.legends.land_use_change import (
@@ -31,9 +28,6 @@ OPENLANDMAP_LC = {
     "2015": "https://s3.openlandmap.org/arco/lc_glad.glcluc_c_30m_s_20150101_20151231_go_epsg.4326_v20230901.tif",
     "2020": "https://s3.openlandmap.org/arco/lc_glad.glcluc_c_30m_s_20200101_20201231_go_epsg.4326_v20230901.tif",
 }
-
-
-
 
 
 def map_esa_to_esri_classes() -> Optional[int]:
@@ -219,20 +213,7 @@ class BaseLandCover(BaseEnvironmentalMetric):
     def getlegend(self) -> Dict[int, str]:
         return self.legend
 
-    def get_xarray_with_class_names(
-        self,
-        start_date: str,
-        end_date: str,
-    ):
-        ds_list = self.load_xarray(
-            start_date=start_date,
-            end_date=end_date,
-        )
-        for ds in ds_list:
-            ds = ds.assign_coords(
-                **{self.band_name: ds[self.band_name].map(self.legend)}
-            )
-        return ds_list
+
 
     def get_land_use_metrics(
         self,
@@ -264,31 +245,26 @@ class BaseLandCover(BaseEnvironmentalMetric):
         if not items:
             raise ValueError("No items found for the given date range and polygon")
 
-        # Get the CRS from the first raster and ensure the GeoDataFrame is in the same CRS
-        import rasterio
-        with rasterio.open(items[0].assets[self.band_name].href) as src:
-            raster_crs = src.crs
-        gdf_raster_crs = self.gdf.to_crs(raster_crs)
-
         # Get legend mapping
         label_map = self.get_legend_labels_dict()
-        
+
         # Calculate total areas in hectares
         total_areas_ha = self.gdf.to_crs("EPSG:6933").area / 10000
-        
-        # Initialize results list - one dict per polygon
-        polygon_results = [{} for _ in range(len(self.gdf))]
-        
-        # Sort items by year to ensure consistent ordering
-        items_sorted = sorted(items, key=lambda item: pd.to_datetime(item.properties['start_datetime']).year)
-        
+
+        # Initialize list to store all data for pandas processing
+        all_data = []
+
         # Process each item
-        for item in items_sorted:
+        for item in items:
+            with rasterio.open(item.assets[self.band_name].href) as src:
+                raster_crs = src.crs
+            gdf_raster_crs = self.gdf.to_crs(raster_crs)
+            
             # Extract year from item properties
-            year = pd.to_datetime(item.properties['start_datetime']).year
-            
+            year = str(pd.to_datetime(item.properties["start_datetime"]).year)
+
             raster_path = item.assets[self.band_name].href
-            
+
             # Count pixels per land cover class within each polygon
             stats_dict = zonal_stats(
                 gdf_raster_crs,
@@ -297,30 +273,63 @@ class BaseLandCover(BaseEnvironmentalMetric):
                 all_touched=all_touched,
             )
 
-            areas_dict = []
-            for polygon_stats, total_area_ha in zip(stats_dict, total_areas_ha):
-                area_stats = {}
+            # Process each polygon's stats
+            for polygon_idx, (polygon_stats, total_area_ha) in enumerate(zip(stats_dict, total_areas_ha)):
+                if not polygon_stats:  # Skip empty stats
+                    continue
+                    
                 total_pixels = sum(polygon_stats.values())
-                for class_id, count in polygon_stats.items():
-                    area_stats[class_id] = round(count / total_pixels * total_area_ha, 2)
-                areas_dict.append(area_stats)
-        
-            # Remap class ids to labels using the legend and add to polygon results
-            for polygon_idx, area_stats in enumerate(areas_dict):
-                # Group areas by their mapped labels and sum them
-                grouped_areas = {}
-                for cid, area in area_stats.items():
-                    label = label_map.get(cid, str(cid))
-                    if label in grouped_areas:
-                        grouped_areas[label] += area
-                    else:
-                        grouped_areas[label] = area
                 
-                # Add this year's data to the corresponding polygon
-                polygon_results[polygon_idx][year] = grouped_areas
-            
-        return polygon_results
+                # Calculate areas for each class
+                for class_id, count in polygon_stats.items():
+                    area_ha = round(count / total_pixels * total_area_ha, 2)
+                    label = label_map.get(class_id, str(class_id))
+                    
+                    # Store data for pandas processing
+                    all_data.append({
+                        'polygon_idx': polygon_idx,
+                        'year': year,
+                        'class_id': class_id,
+                        'label': label,
+                        'pixel_count': count,
+                        'area_ha': area_ha
+                    })
 
+        # Convert to DataFrame for easier processing
+        if not all_data:
+            return [{} for _ in range(len(self.gdf))]
+            
+        df = pd.DataFrame(all_data)
+        
+        # Group by polygon, year, and label, then sum the areas
+        grouped_df = df.groupby(['polygon_idx', 'year', 'label'])['area_ha'].sum().reset_index()
+        
+        # Pivot to get years as columns and labels as rows
+        pivot_df = grouped_df.pivot_table(
+            index=['polygon_idx', 'label'], 
+            columns='year', 
+            values='area_ha', 
+            fill_value=0
+        ).reset_index()
+        
+        # Convert to the expected format
+        polygon_results = [{} for _ in range(len(self.gdf))]
+        
+        for _, row in pivot_df.iterrows():
+            polygon_idx = int(row['polygon_idx'])
+            label = row['label']
+            
+            # Add each year's data to the polygon
+            for year in df['year'].unique():
+                year_str = str(year)
+                if year_str in row.index:
+                    area = row[year_str]
+                    if area > 0:  # Only add non-zero areas
+                        if year_str not in polygon_results[polygon_idx]:
+                            polygon_results[polygon_idx][year_str] = {}
+                        polygon_results[polygon_idx][year_str][label] = area
+
+        return polygon_results
 
     def get_data(
         self,
@@ -344,11 +353,11 @@ class BaseLandCover(BaseEnvironmentalMetric):
             end_date=end_date,
             all_touched=all_touched,
         )
-        
+
         # Get ESRI class labels (not the raw numbers)
         esri_labels = list(ESRI_LAND_COVER_LEGEND.values())
-        esri_label_names = [label['label'] for label in esri_labels]
-        
+        esri_label_names = [label["label"] for label in esri_labels]
+
         # Process each polygon's data
         for polygon_data in area_dicts:
             # Process each year's data within the polygon
@@ -357,7 +366,7 @@ class BaseLandCover(BaseEnvironmentalMetric):
                 for label_name in esri_label_names:
                     if label_name not in year_data:
                         year_data[label_name] = 0
-        
+
         return area_dicts
 
 
@@ -384,7 +393,7 @@ class EsaLandCover(BaseLandCover):
             band_name="lccs_class",
             legend=map_esa_to_esri_classes(),
         )
-        self.gdf = gdf.to_crs(epsg=4326)
+        self.gdf = gdf
 
 
 class EsriLandCover(BaseLandCover):
@@ -407,7 +416,7 @@ class EsriLandCover(BaseLandCover):
             band_name="data",
             legend=ESRI_LAND_COVER_LEGEND,
         )
-        self.gdf = gdf.to_crs(epsg=4326)
+        self.gdf = gdf
 
 
 class OpenLandMapLandCover(BaseLandCover):
@@ -435,11 +444,9 @@ class OpenLandMapLandCover(BaseLandCover):
         )
         self.gdf = gdf.to_crs(epsg=4326)
 
-
-
     def create_map(self, polygons: dict | list, polygon_crs: str, **kwargs) -> None:
         """Create a map for the land use change data
-        
+
         Args:
             polygons: Single GeoJSON polygon or list of polygons
             polygon_crs: CRS of the input polygon(s)
@@ -447,18 +454,18 @@ class OpenLandMapLandCover(BaseLandCover):
         # Convert single polygon to list for consistent handling
         if isinstance(polygons, dict):
             polygons = [polygons]
-            
+
         # Preprocess all polygons
         processed_polygons = [
             self._preprocess_geometry(polygon, source_crs=polygon_crs)
             for polygon in polygons
         ]
-        
+
         # Get center from first polygon
         gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
         bounds = gdf.total_bounds
-        center = ((bounds[1] + bounds[3])/2, (bounds[0] + bounds[2])/2)
-        
+        center = ((bounds[1] + bounds[3]) / 2, (bounds[0] + bounds[2]) / 2)
+
         m = leafmap.Map(
             center=(center[1], center[0]),
             zoom=14,
@@ -471,7 +478,7 @@ class OpenLandMapLandCover(BaseLandCover):
             scale_control=False,
             toolbar_control=True,
         )
-        
+
         colormap = self.get_legend_colors()
         for year, cog in OPENLANDMAP_LC.items():
             m.add_cog_layer(
@@ -479,19 +486,16 @@ class OpenLandMapLandCover(BaseLandCover):
                 colormap=json.dumps(colormap),
                 name=year,
                 attribution="UMD GLAD",
-                shown=True
+                shown=True,
             )
-            
+
         # Create GeoDataFrame from processed polygons
         gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
         m.add_gdf(gdf, layer_name="Your Parcels", zoom_to_layer=True)
-        
+
         return m
+        # Create GeoDataFrame from processed polygons
+        gdf = gpd.GeoDataFrame(geometry=processed_polygons, crs=self.target_crs)
+        m.add_gdf(gdf, layer_name="Your Parcels", zoom_to_layer=True)
 
-
-        
-        
-
-
-        
-        
+        return m
